@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GhostVPN - Успешная регистрация</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .hero {
+      background: url('../static/images/hooded-man.jpg') no-repeat center center / cover;
+      color: #fff;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .form-container {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      width: 300px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .message {
+      margin-top: 20px;
+      color: #1db954;
+      text-align: center;
+    }
+
+    a {
+      margin-top: 20px;
+      color: #1db954;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    strong {
+    font-weight: bold; /* Убедитесь, что текст жирный */
+    color: #1db954; /* Применить цвет, если хотите */
+    font-size: 1.2em; /* Увеличить размер шрифта */
+  }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="form-container">
+      <h2>Поздравляем с успешной регистрацией!</h2>
+      {% if message %}
+        <div class="message">{{ message }}</div>
+        <p>Ваш публичный ключ: <strong class="key">{{ public_key }}</strong></p>
+        <p>Ваш приватный ключ: <strong class="key">{{ private_key }}</strong> (Никогда и никому не сообщайте свой приватный ключ)</p>
+      {% endif %}
+      <a onclick="location.href='/login'">Перейти к входу</a>
+    </div>
+  </section>
+</body>
+</html>

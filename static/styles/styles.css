@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.hero {
+  background: url('../images/hooded-man.jpg') no-repeat center center / cover;
+  color: #fff;
+  height: 100vh;
+  width: 192.5vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Центрирование по вертикали */
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.hero-header {
+  position: absolute;
+  top: 40px;
+  width: 100%;
+  text-align: center;
+}
+
+.hero-header h1 {
+  font-size: 5em;
+  margin: 0;
+  color: #fff;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Центрирование по вертикали */
+  text-align: center;
+}
+
+.hero-content p {
+  font-size: 2.3em;
+  margin-bottom: 300px;
+}
+
+.cta-button {
+  background-color: #1db954;
+  color: #fff;
+  padding: 15px 40px; /* Уменьшение размеров кнопки для удобства */
+  text-decoration: none;
+  border-radius: 50px;
+  display: inline-block;
+}
+
+.footer-text {
+  position: absolute;
+  bottom: 20px; /* Отступ от низа */
+  text-align: center;
+  width: 100%;
+}
+
+.footer-text p {
+  margin: 0;
+}
+
+.benefits {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  position: absolute;
+  bottom: 45px;
+}
+
+.benefit {
+  max-width: 200px;
+  text-align: center;
+  color: #e0e0e0;
+}
+
+.footer {
+  background: rgba(0, 0, 0, 0.7);
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.footer-links a {
+  color: #e0e0e0;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.footer-links a:hover {
+  color: #1db954;
+}

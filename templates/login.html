@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GhostVPN Login</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .hero {
+      background: url('../static/images/hooded-man.jpg') no-repeat center center / cover;
+      color: #fff;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .form-container {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      width: 300px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 80%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 50px;
+    }
+
+    button {
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      width: 90%;
+    }
+
+    button:hover {
+      background-color: #1a8a3b;
+    }
+
+    .toggle-button {
+      margin-top: 20px;
+      color: #1db954;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="form-container">
+      <h2>Вход</h2>
+      <form action="/login" method="POST">
+        <label for="login-username">Имя пользователя</label>
+        <input type="text" id="login-username" name="username" required>
+
+        <label for="login-public-key">Публичный ключ</label>
+        <input type="text" id="login-public-key" name="public_key" required>
+
+        <button type="submit">Войти</button>
+      </form>
+      <div>
+          <div class="toggle-button" onclick="location.href='/registration'">Нет аккаунта? Зарегистрироваться </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
