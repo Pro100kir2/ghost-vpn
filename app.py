@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify
+from flask import Flask, request, render_template, jsonify
 import psycopg2
 import random
 import string
@@ -45,7 +45,7 @@ def register():
             return jsonify({'error': 'Извините, но пользователь с таким именем уже есть, выберите другой.'}), 400
 
         # Вставка нового пользователя
-        cur.execute("INSERT INTO users (username, email, public_key, private_key) VALUES (%s, %s, %s, %s)",
+        cur.execute('INSERT INTO users (username, email, public_key, private_key) VALUES (%s, %s, %s, %s)',
                     (username, email, public_key, private_key))
         conn.commit()  # Подтверждаем изменения
         cur.close()
