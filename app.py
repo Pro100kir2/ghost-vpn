@@ -9,7 +9,7 @@ app = Flask(__name__)
 DB_NAME = 'ghostvpn'
 DB_USER = 'pro100kir2'
 DB_PASSWORD = '1234'
-DB_HOST = 'localhost'
+DB_HOST = 'Lockalhost'
 
 def generate_keys():
     public_key = ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
