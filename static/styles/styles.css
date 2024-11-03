@@ -53,6 +53,11 @@ body {
   text-decoration: none;
   border-radius: 50px;
   display: inline-block;
+  transition: background-color 0.3s; /* Плавный переход цвета */
+}
+
+.cta-button:hover {
+  background-color: #1ab048; /* Цвет при наведении */
 }
 
 .footer-text {
@@ -98,4 +103,40 @@ body {
 
 .footer-links a:hover {
   color: #1db954;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+  .hero-header h1 {
+    font-size: 3.5em; /* Уменьшение размера заголовка на мобильных устройствах */
+  }
+
+  .hero-content p {
+    font-size: 1.5em; /* Уменьшение размера текста на мобильных устройствах */
+    margin-bottom: 100px; /* Уменьшение отступа для лучшего отображения */
+  }
+
+  .cta-button {
+    padding: 10px 30px; /* Уменьшение размеров кнопки для мобильных устройств */
+  }
+
+  .benefits {
+    flex-direction: column; /* Изменение на колонный стиль на мобильных устройствах */
+    align-items: center; /* Центрирование элементов */
+  }
+
+  .benefit {
+    max-width: 90%; /* Увеличение ширины карточек преимуществ */
+    margin-bottom: 20px; /* Отступ между карточками */
+  }
+}
+
+@media (min-width: 769px) {
+  .benefits {
+    flex-direction: row; /* Установка рядного стиля для больших экранов */
+  }
+
+  .benefit {
+    margin: 0 10px; /* Отступ между карточками */
+  }
 }
