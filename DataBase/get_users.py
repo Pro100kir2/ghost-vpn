@@ -2,27 +2,57 @@ import os
 import psycopg2
 from urllib.parse import urlparse
 
-# Обновленная функция подключения
-def get_db_connection():
-    # Читаем переменную окружения
-    db_url = os.environ.get("DATABASE_URL")
 
-    # Парсим URL для извлечения компонентов
+# Функция для подключения к базе данных
+def get_db_connection():
+    # Получаем URL базы данных из переменной окружения
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        raise ValueError("DATABASE_URL не задана в переменных окружения.")
+
+    # Парсим URL, чтобы получить параметры подключения
     result = urlparse(db_url)
 
-    # Извлекаем параметры для подключения
-    db_name = result.path[1:]
-    db_user = result.username
-    db_password = result.password
-    db_host = result.hostname
-    db_port = result.port
-
-    # Подключаемся к базе данных
+    # Устанавливаем соединение с базой данных
     return psycopg2.connect(
-        dbname=db_name,
-        user=db_user,
-        password=db_password,
-        host=db_host,
-        port=db_port
+        dbname=result.path[1:],  # убираем начальный слэш
+        user=result.username,
+        password=result.password,
+        host=result.hostname,
+        port=result.port
     )
 
+
+# Функция для получения и вывода списка зарегистрированных пользователей
+def get_registered_users():
+    conn = None
+    try:
+        # Подключаемся к базе данных
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # SQL-запрос для получения списка пользователей
+        cur.execute("SELECT username, email, public_key FROM users")
+
+        # Получаем все результаты запроса
+        users = cur.fetchall()
+
+        # Закрываем курсор
+        cur.close()
+
+        # Выводим список пользователей
+        for user in users:
+            print(f"Username: {user[0]}, Email: {user[1]}, Public Key: {user[2]}")
+
+    except Exception as e:
+        print(f"Ошибка при получении пользователей: {str(e)}")
+
+    finally:
+        # Закрываем соединение с базой данных
+        if conn:
+            conn.close()
+
+
+# Запуск основной функции, если скрипт запускается как отдельная программа
+if __name__ == "__main__":
+    get_registered_users()
