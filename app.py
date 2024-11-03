@@ -3,6 +3,7 @@ import psycopg2
 import os
 import random
 import string
+import uuid  # Import the uuid module
 from urllib.parse import urlparse
 from functools import wraps
 
@@ -13,6 +14,9 @@ def generate_keys():
     public_key = ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
     private_key = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
     return public_key, private_key
+
+def generate_unique_id():
+    return str(uuid.uuid4())  # Generate a UUID
 
 def get_db_connection():
     db_url = os.environ.get('DATABASE_URL')
@@ -50,6 +54,7 @@ def register():
     email = data.get('email')
 
     public_key, private_key = generate_keys()
+    unique_id = generate_unique_id()  # Generate a unique ID
 
     conn = None
     try:
@@ -59,8 +64,8 @@ def register():
         if is_username_taken(cur, username):
             return jsonify({'error': 'Извините, но пользователь с таким именем уже есть, выберите другой.'}), 400
 
-        cur.execute('INSERT INTO users (username, email, public_key, private_key) VALUES (%s, %s, %s, %s)',
-                    (username, email, public_key, private_key))
+        cur.execute('INSERT INTO users (id, username, email, public_key, private_key) VALUES (%s, %s, %s, %s, %s)',
+                    (unique_id, username, email, public_key, private_key))  # Include unique ID in the query
         conn.commit()
         cur.close()
 

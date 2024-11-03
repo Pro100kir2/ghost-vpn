@@ -1,39 +1,47 @@
+import os
 import psycopg2
-
-# Настройки подключения к базе данных
-DB_NAME = 'ghostvpn'
-DB_USER = 'pro100kir2'
-DB_PASSWORD = '1234'
-DB_HOST = 'localhost'
-DB_PORT = '5432'  # Порт PostgreSQL
+from urllib.parse import urlparse
 
 
-def clear_users_table():
+# Функция для подключения к базе данных
+def get_db_connection():
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        raise ValueError("DATABASE_URL не задана в переменных окружения.")
+    result = urlparse(db_url)
+    return psycopg2.connect(
+        dbname=result.path[1:],
+        user=result.username,
+        password=result.password,
+        host=result.hostname,
+        port=result.port
+    )
+
+
+# Функция для удаления пользователя по ID
+def delete_user_by_id(user_id):
+    conn = None
     try:
-        # Подключение к базе данных
-        connection = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-        cursor = connection.cursor()
+        # Подключаемся к базе данных
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-        # Команда TRUNCATE для очистки таблицы
-        cursor.execute("TRUNCATE TABLE users RESTART IDENTITY;")
-        connection.commit()  # Подтверждаем изменения
-        print("Таблица users успешно очищена.")
+        # Удаляем запись по ID
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()  # Подтверждаем изменения
+        cur.close()
+
+        print(f"Пользователь с ID {user_id} был успешно удален.")
 
     except Exception as e:
-        print(f"Ошибка при очистке таблицы: {str(e)}")
+        print(f"Ошибка при удалении пользователя: {str(e)}")
 
     finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+        if conn:
+            conn.close()
 
 
-# Вызов функции
-clear_users_table()
+# Запросить ID для удаления
+if __name__ == "__main__":
+    user_id = input("Введите ID пользователя для удаления: ")
+    delete_user_by_id(user_id)

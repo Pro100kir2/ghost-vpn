@@ -32,17 +32,18 @@ def get_registered_users():
         cur = conn.cursor()
 
         # SQL-запрос для получения списка пользователей
-        cur.execute("SELECT username, email, public_key FROM users")
+        cur.execute("SELECT id,  username, email, public_key FROM users")
 
         # Получаем все результаты запроса
         users = cur.fetchall()
 
         # Закрываем курсор
         cur.close()
-
-        # Выводим список пользователей
-        for user in users:
-            print(f"Username: {user[0]}, Email: {user[1]}, Public Key: {user[2]}")
+        if len(users) != 0:
+            for user in users:
+                print(f"ID: {user[0]}, Username: {user[1]}, Email: {user[2]}, Public Key: {user[3]}")
+        else:
+            print("Таблица пуста, в ней нету пользователей")
 
     except Exception as e:
         print(f"Ошибка при получении пользователей: {str(e)}")
