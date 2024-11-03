@@ -6,7 +6,7 @@ body {
 }
 
 .hero {
-  background: url('../images/hooded-man.jpg') no-repeat center center / cover;
+  background: url('/static/images/hooded-man.jpg') no-repeat center center / cover;
   color: #fff;
   height: 100vh;
   width: 192.5vh;
