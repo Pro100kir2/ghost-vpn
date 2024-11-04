@@ -1,9 +1,9 @@
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, flash
 import psycopg2
 import os
 import random
 import string
-import uuid  # Import the uuid module
+import uuid
 from urllib.parse import urlparse
 from functools import wraps
 
@@ -16,12 +16,11 @@ def generate_keys():
     return public_key, private_key
 
 def generate_unique_id():
-    return str(uuid.uuid4())  # Generate a UUID
+    return str(uuid.uuid4())
 
 def get_db_connection():
     db_url = os.environ.get('DATABASE_URL')
     result = urlparse(db_url)
-
     return psycopg2.connect(
         dbname=result.path[1:],
         user=result.username,
@@ -47,6 +46,7 @@ def index():
 def registration_page():
     return render_template('registration.html')
 
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.form
@@ -54,7 +54,7 @@ def register():
     email = data.get('email')
 
     public_key, private_key = generate_keys()
-    unique_id = generate_unique_id()  # Generate a unique ID
+    unique_id = generate_unique_id()
 
     conn = None
     try:
@@ -62,19 +62,22 @@ def register():
         cur = conn.cursor()
 
         if is_username_taken(cur, username):
-            return jsonify({'error': 'Извините, но пользователь с таким именем уже есть, выберите другой.'}), 400
+            flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
+            return redirect(url_for('registration_page'))
 
         cur.execute('INSERT INTO users (id, username, email, public_key, private_key) VALUES (%s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key))  # Include unique ID in the query
+                    (unique_id, username, email, public_key, private_key))
         conn.commit()
         cur.close()
 
+        flash('Поздравляем с успешной регистрацией!', 'success')
         return render_template('new_user.html', message='Поздравляем с успешной регистрацией!', public_key=public_key, private_key=private_key)
 
     except Exception as e:
         if conn:
             conn.rollback()
-        return jsonify({'error': f'Ошибка при добавлении пользователя: {str(e)}'}), 400
+        flash(f'Ошибка при добавлении пользователя: {str(e)}', 'error')
+        return redirect(url_for('registration_page'))
     finally:
         if conn:
             conn.close()
@@ -101,14 +104,14 @@ def login_page():
                 session['user_id'] = user[0]
                 return redirect(url_for('home'))
             else:
-                return jsonify({'error': 'Неверное имя пользователя или публичный ключ!'}), 400
-
+                flash("Неверное имя пользователя или публичный ключ!", "error")
+                return redirect(url_for('login_page'))
         except Exception as e:
-            return jsonify({'error': f'Ошибка при входе: {str(e)}'}), 400
+            flash(f'Ошибка при входе: {str(e)}', "error")
+            return redirect(url_for('login_page'))
         finally:
             if conn:
                 conn.close()
-
     return render_template('login.html')
 
 @app.route('/home')
