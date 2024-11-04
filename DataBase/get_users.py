@@ -41,7 +41,7 @@ def get_registered_users():
         cur.close()
         if len(users) != 0:
             for user in users:
-                print(f"ID: {user[0]}, Username: {user[1]}, Email: {user[2]}, Public Key: {user[3]}")
+                print(f"ID: {user[0]} , Username: {user[1]}, Email: {user[2]}, Public Key: {user[3]}")
         else:
             print("Таблица пуста, в ней нету пользователей")
 
@@ -52,7 +52,6 @@ def get_registered_users():
         # Закрываем соединение с базой данных
         if conn:
             conn.close()
-
 
 # Запуск основной функции, если скрипт запускается как отдельная программа
 if __name__ == "__main__":
