@@ -63,7 +63,8 @@ def register():
 
         if is_username_taken(cur, username):
             flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
-            return redirect(url_for('registration_page'))
+            # Передаем введенные данные обратно в шаблон
+            return render_template('registration.html', username=username, email=email)
 
         cur.execute('INSERT INTO users (id, username, email, public_key, private_key) VALUES (%s, %s, %s, %s, %s)',
                     (unique_id, username, email, public_key, private_key))
@@ -77,10 +78,11 @@ def register():
         if conn:
             conn.rollback()
         flash(f'Ошибка при добавлении пользователя: {str(e)}', 'error')
-        return redirect(url_for('registration_page'))
+        return render_template('registration.html', username=username, email=email)
     finally:
         if conn:
             conn.close()
+
 
 def is_username_taken(cursor, username):
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))

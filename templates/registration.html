@@ -100,24 +100,22 @@
           </div>
         {% endif %}
       {% endwith %}
+
       <form action="/register" method="POST">
         <label for="username">Имя пользователя</label>
         <input type="text" id="username" name="username" required
-               {% with messages = get_flashed_messages(with_categories=true) %}
-               {% if messages %}
-                 {% for category, message in messages %}
-                   {% if category == 'username_taken' %}
-                     class="error-field"
-                   {% endif %}
-                 {% endfor %}
-               {% endif %}
-               {% endwith %}
-        >
+               value="{{ username if username else '' }}"
+               {% if messages and messages[0][0] == 'username_taken' %}
+               class="error-field"
+               {% endif %}>
+
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" required
+               value="{{ email if email else '' }}">
 
         <button type="submit">Зарегистрироваться</button>
       </form>
+
       <div class="toggle-button" onclick="location.href='/login'">Уже есть аккаунт? Войти</div>
     </div>
   </section>
