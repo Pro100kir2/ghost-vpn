@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль</title>
+  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
+  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+
+  <!-- Большие иконки для Android и iOS -->
+  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
+  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
+  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
+
+  <!-- Иконка для Windows (favicon.ico) -->
+  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+
+  <style>
+    /* Общие стили */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Hero секция */
+    .hero {
+      background: url('../static/images/home-fon.png') no-repeat center center / cover;
+      color: #fff;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+      margin: 0;
+      position: relative;
+    }
+
+    /* Заголовок */
+    .header {
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      color: #fff;
+      font-size: 2em;
+      position: absolute; /* Абсолютное позиционирование */
+      top: 20px; /* Положение сверху */
+      left: 0; /* Выровнять по левому краю */
+    }
+
+    /* Стили для секций профиля */
+    .profile-content {
+      margin-top: 300px; /* Отступ для размещения под заголовком */
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+    }
+
+    .profile-section {
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .profile-section h2 {
+      margin-top: 0;
+    }
+
+    .cta-button {
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background-color: #17a148;
+    }
+
+    /* Стили для кнопки "Назад" */
+    .back-button {
+      background-color: #1db954; /* Цвет кнопки */
+      color: #fff; /* Цвет текста кнопки */
+      padding: 10px 20px; /* Отступы кнопки */
+      border: none; /* Убрать рамку */
+      border-radius: 5px; /* Закругление углов */
+      cursor: pointer; /* Указатель при наведении */
+      font-size: 1em; /* Размер шрифта */
+      text-decoration: none; /* Убрать подчеркивание */
+      position: absolute; /* Абсолютное позиционирование */
+      bottom: 80px; /* Отступ от нижней границы */
+      left: 50%; /* Центрирование по горизонтали */
+      transform: translateX(-50%); /* Центрирование кнопки */
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <header class="header">
+      <h1>Ваш профиль</h1>
+      <nav class="profile-nav">
+      </nav>
+    </header>
+
+    <section class="profile-content">
+      <div class="profile-section">
+        <h2>Текущий тариф</h2>
+        <p>Ваш тариф: <strong>Тариф «На разок»</strong></p>
+        <a href="tariff.html" class="cta-button">Посмотреть тарифы</a>
+      </div>
+
+      <div class="profile-section">
+        <h2>Мои устройства</h2>
+        <p>Здесь будут перечислены ваши подключенные устройства.</p>
+      </div>
+
+      <div class="profile-section">
+        <h2>Настройки</h2>
+        <p>Настройте параметры учетной записи и безопасности.</p>
+      </div>
+    </section>
+  </section>
+</body>
+</html>
+

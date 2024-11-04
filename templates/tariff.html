@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тарифы</title>
+  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
+  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+
+  <!-- Большие иконки для Android и iOS -->
+  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
+  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
+  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
+
+  <!-- Иконка для Windows (favicon.ico) -->
+  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+  <style>
+    /* Общие стили */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Hero секция */
+    .hero {
+      background: url('../static/images/home-fon.png') no-repeat center center / cover;
+      color: #fff;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+      margin: 0;
+      position: relative; /* Добавлено для контекста позиционирования */
+    }
+
+    /* Заголовок */
+    .header {
+      background-color: rgba(29, 185, 84, 0.8); /* Прозрачный зеленый фон */
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      color: #fff;
+      position: absolute; /* Абсолютное позиционирование */
+      top: 20px; /* Положение сверху */
+      left: 0; /* Выровнять по левому краю */
+      transform: translateY(0); /* Центрирование по оси Y */
+    }
+
+    /* Стили для тарифов */
+    .tariffs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 160px;
+      width: 100%;
+      max-width: 1200px;
+      position: relative; /* Для позиционирования дочерних элементов */
+    }
+
+    .tariff-card {
+      background-color: #2a2a2a;
+      color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: calc(25% - 20px);
+      min-width: 220px;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 470px; /* Фиксированная высота для выравнивания */
+    }
+
+    .tariff-card h2 {
+      margin-top: 0;
+      font-size: 1.4em;
+    }
+
+    .price {
+      font-size: 1.5em;
+      color: #1db954;
+      margin: 10px 0;
+    }
+
+    .slogan {
+      font-style: italic;
+      color: #007bff; /* Синий цвет слогана */
+      margin-bottom: 15px;
+    }
+
+    .features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .features li {
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+
+    .features li::before {
+      content: "+ ";
+      color: #1db954; /* Зеленый цвет для плюсов */
+      font-weight: bold;
+    }
+
+    .pay-button {
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      margin-top: auto; /* Размещает кнопку внизу карточки */
+    }
+
+    .pay-button:hover {
+      background-color: #17a148;
+    }
+
+    /* Стили для кнопки "Назад" */
+    .back-button {
+      background-color: #1db954; /* Цвет кнопки */
+      color: #fff; /* Цвет текста кнопки */
+      padding: 10px 20px; /* Отступы кнопки */
+      border: none; /* Убрать рамку */
+      border-radius: 5px; /* Закругление углов */
+      cursor: pointer; /* Указатель при наведении */
+      font-size: 1em; /* Размер шрифта */
+      text-decoration: none; /* Убрать подчеркивание */
+      position: absolute; /* Абсолютное позиционирование */
+      bottom: 80px; /* Отступ от нижней границы */
+      left: 50%; /* Центрирование по горизонтали */
+      transform: translateX(-50%); /* Центрирование кнопки */
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Тарифы</h1>
+  </header>
+
+  <section class="hero">
+    <section class="tariffs">
+      <!-- Тариф 1 -->
+      <div class="tariff-card">
+        <h2>Тариф «Пробный ВПН на 3 дня»</h2>
+        <p class="price">Цена: Бесплатно</p>
+        <p class="slogan">После этих трёх дней ваша жизнь разделится на до и после</p>
+        <ul class="features">
+          <li>Бесплатно</li>
+          <li>5 ГБ для ВПН </li>
+        </ul>
+        <a href="/pay/free-trial" class="pay-button">Попробовать бесплатно</a>
+      </div>
+
+      <!-- Тариф 2 -->
+      <div class="tariff-card">
+        <h2>Тариф «Возьму на разок»</h2>
+        <p class="price">Цена: 200₽ / мес</p>
+        <p class="slogan">Тариф для тех, кто входит во вкус свободы</p>
+        <ul class="features">
+          <li>Самый низкий прайс</li>
+          <li>15 ГБ для ВПН</li>
+          <li>Конфиденциальность на уровне провайдеров</li>
+        </ul>
+        <a href="/pay/single-month" class="pay-button">Оплатить</a>
+      </div>
+
+      <!-- Тариф 3 -->
+      <div class="tariff-card">
+        <h2>Тариф «Ну, можно еще»</h2>
+        <p class="price">Цена: 450₽ / мес</p>
+        <p class="slogan">Свобода сладка, не так ли ?</p>
+        <ul class="features">
+          <li>Всё, что у тарифа «На разок»</li>
+          <li>Доп. 25 ГБ</li>
+          <li>Относительно невысокая цена</li>
+          <li>Конфиденциальность на уровне государства</li>
+        </ul>
+        <a href="/pay/more-vpn" class="pay-button">Оплатить</a>
+      </div>
+
+      <!-- Тариф 4 -->
+      <div class="tariff-card">
+        <h2>Тариф «Мне как обычно»</h2>
+        <p class="price">Цена: 750₽ / мес</p>
+        <p class="slogan">Вы уже гуру и точно знаете, что вам нужно</p>
+        <ul class="features">
+          <li>Всё, что у тарифа «Ну, можно еще»</li>
+          <li>Доп. 25 ГБ</li>
+          <li>Самый надежный VPN мирового уровня</li>
+          <li>Автоматическая смена зоны VPN для стабильного соединения
+        </ul>
+        <a href="/pay/regular" class="pay-button">Оплатить</a>
+      </div>
+    </section>
+
+    <!-- Кнопка назад -->
+    <a href="profile.html" class="back-button">Назад</a>
+  </section>
+</body>
+</html>

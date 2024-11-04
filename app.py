@@ -121,10 +121,14 @@ def login_page():
 def home():
     return render_template('home.html')
 
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('login_page'))
+# Пример для Flask
+@app.route('/profile.html')
+def profile():
+    return render_template('profile.html')
+@app.route('/tariff.html')
+def tariff():
+    return render_template('tariff.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
