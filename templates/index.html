@@ -1,229 +1,188 @@
 <!DOCTYPE html>
+
 <html lang="ru">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>GhostVPN</title>
+    <link rel="icon" href="/static/images/favicon1.png" type="image/png">
+    <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+
+  <!-- Большие иконки для Android и iOS -->
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
+    <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
+    <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
+
+  <!-- Иконка для Windows (favicon.ico) -->
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background-color: #121212;
             color: #e0e0e0;
-            overflow-x: hidden;
         }
 
         .hero {
             background: url('/static/images/hooded-man.jpg') no-repeat center center / cover;
             color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            position: relative;
-            box-sizing: border-box;
+            height: 100vh;
+            position: relative; /* Для позиционирования элементов внутри */
         }
 
         .hero-header {
             position: absolute;
-            top: 20px;
+            top: -10px;
             width: 100%;
-            font-size: 4em;
+            transform: translate(0%, 0%); /* По центру */
+            font-size: 3em;
             text-align: center;
-            transition: font-size 0.3s, margin-top 0.3s;
+        }
+
+        .hero-content {
+            position: absolute;
+            top: 35%; /* чуть выше середины */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
         }
 
         .privacy-message {
-            margin-top: 130px;
-            font-size: 1.7em;
-            max-width: 800px;
-            line-height: 1.4;
-            z-index: 2;
-            transition: font-size 0.3s, margin-top 0.3s;
+            font-size: 2em;
+            margin-top: 200px;
         }
 
-        .cta-button {
-            background-color: #1db954;
-            color: #fff;
-            padding: 15px 30px;
-            font-size: 1.2em;
-            text-decoration: none;
-            border-radius: 50px;
-            display: inline-block;
-            margin-top: 50px;
-            transition: background-color 0.3s;
+        .cta-button-container {
+            margin-top: 350px;
+        }
+
+        .footer-text {
             position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 3;
-        }
-
-        .cta-button:hover {
-            background-color: #1a8a3b;
+            bottom: 14%; /* в самом низу */
+            left: 50%;
+            transform: translate(-50%, 50%);
+            text-align: center;
         }
 
         .benefits {
             display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            padding: 10px;
-            background-color: rgba(18, 18, 18, 0.1);
-            width: 100%;
-            box-sizing: border-box;
+            justify-content: center;
+            padding:1px;
             position: absolute;
-            top: 92%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-            border-radius: 10px;
+            bottom: 0;
+            width: 97.5%;
+            background-color: rgba(18, 18, 18, 0.7); /* Полупрозрачный фон для блоков */
+            padding: 20px;
         }
 
         .benefit {
-            flex: 1 1 150px;
-            max-width: 200px;
             margin: 10px;
-            text-align: center;
-            color: #e0e0e0;
+            flex: 1;
         }
 
-        .benefit h3 {
-            font-size: 1.2em;
-            margin: 10px 0;
-            transition: font-size 0.3s;
+        /* Стили для кнопки */
+        .cta-button {
+            background-color: #1db954;
+            color: #fff;
+            padding: 15px 30px; /* Оптимизированные размеры кнопки */
+            text-decoration: none;
+            border-radius: 50px;
+            display: inline-block;
+            transition: background-color 0.3s; /* Плавный переход цвета */
         }
 
-        .benefit p {
-            font-size: 0.95em;
-            line-height: 1.3;
-            transition: font-size 0.3s;
+        .cta-button:hover {
+            background-color: #1a8a3b; /* Цвет при наведении */
         }
-
-        .footer-text {
-            text-align: center;
-            padding: 0.5px;
-            font-size: 0.8em;
-            background-color: rgba(18, 18, 18, 0.8);
-            width: 100%;
-            position: relative;
-        }
-
-        @media (max-width: 768px) {
+                @media (max-width: 480px) {
             .hero-header {
-                font-size: calc(3em - 1.5em);
-                margin-top: 10px;
+                font-size: 1.5em;
             }
 
             .privacy-message {
-                font-size: calc(2.5em - 1.5em);
-                padding: 0 10px;
-                margin-top: 50px;
+                font-size: 1em;
             }
 
             .cta-button {
-                padding: 12px 24px;
-                font-size: 1em; /* Increased button size */
-                margin-top: 30px; /* Moving button higher on smaller screen */
+                padding: 8px 16px;
+                font-size: 0.9em;
             }
 
-            /* Изменение размера заголовков h3 при уменьшении экрана */
-            .benefit h3 {
-                font-size: calc(1.2em - 0.5em); /* Сделать заголовки еще меньше на экранах до 768px */
-            }
-
-            .benefit p {
-                font-size: calc(0.95em - 0.3em);
-            }
-
-            .benefit p {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-header {
-                font-size: calc(2.5em - 1.5em);
-                margin-top: 5px;
-            }
-
-            .privacy-message {
-                font-size: calc(1.2em - 1.5em);
-                margin-top: 10px;
-            }
-
-            .cta-button {
-                padding: 10px 20px;
-                font-size: 1em; /* Увеличим размер кнопки */
-                margin-top: 30px; /* Перемещаем кнопку выше */
-            }
-
-            /* Изменение размера заголовков h3 при минимальном размере экрана */
-            .benefit h3 {
-                font-size: calc(1.1em - 0.4em); /* Сделать заголовки еще меньше */
-            }
-
-            .benefit p {
-                font-size: calc(0.95em - 0.5em);
-            }
-
-            .benefit p {
-                display: none;
+            .benefits {
+                flex-direction: column;
             }
         }
     </style>
+
 </head>
+
 <body>
 
     <section class="hero">
-        <div class="hero-header" id="heroHeader">Оставайтесь незамеченными с GhostVPN</div>
-        <p class="privacy-message" id="privacyMessage">Мы защищаем вашу приватность и делаем вас невидимыми для интернет-провайдеров и правительственных служб.</p>
-        <a href="/registration" class="cta-button">Шагнуть в тень!</a>
-        <section class="benefits">
-            <div class="benefit">
-                <h3>Анонимность</h3>
-                <p>С GhostVPN ваш IP остается скрытым.</p>
+
+        <div class="hero-header">
+
+            <h1>Оставайтесь незамеченными с GhostVPN</h1>
+
+        </div>
+
+        <div class="hero-content">
+            <p class="privacy-message">Мы защищаем вашу приватность и делаем вас невидимыми для интернет-провайдеров и правительственных служб.</p>
+            <div class="cta-button-container">
+                <a href="/registration" class="cta-button">Шагнуть в тень!</a>
             </div>
-            <div class="benefit">
-                <h3>Безопасность</h3>
-                <p>Военная защита данных.</p>
-            </div>
-            <div class="benefit">
-                <h3>Доступ к любому контенту</h3>
-                <p>Получите доступ к сайтам, которые вам нужны.</p>
-            </div>
-            <div class="benefit">
-                <h3>Скорость</h3>
-                <p>Наши серверы обеспечивают высокую скорость соединения.</p>
-            </div>
-        </section>
+        </div>
+
     </section>
 
-    <div class="footer-text">
-        <p>© 2024 GhostVPN. Все права защищены. Свобода начинается с безопасности!</p>
-    </div>
+    <section class="benefits">
 
-    <script>
-        function adjustTextContent() {
-            const screenWidth = window.innerWidth;
-            const heroHeader = document.getElementById("heroHeader");
-            const privacyMessage = document.getElementById("privacyMessage");
+        <div class="benefit">
 
-            if (screenWidth <= 480) {
-                heroHeader.textContent = "GhostVPN";
-                privacyMessage.textContent = "Мы защищаем вас даже если против вас весь мир";
-            } else if (480<screenWidth <= 768) {
-                heroHeader.textContent = "GhostVPN — безопасность и свобода";
-                privacyMessage.textContent = "Мы защищаем вашу приватность и скрываем ваши данные.";
-            } else {
-                heroHeader.textContent = "Оставайтесь незамеченными с GhostVPN";
-                privacyMessage.textContent = "Мы защищаем вашу приватность и делаем вас невидимыми для интернет-провайдеров и правительственных служб.";
-            }
-        }
+            <h3>Анонимность</h3>
 
-        window.addEventListener("load", adjustTextContent);
-        window.addEventListener("resize", adjustTextContent);
-    </script>
+            <p>С GhostVPN ваш IP остается скрытым.</p>
+
+        </div>
+
+        <div class="benefit">
+
+            <h3>Безопасность</h3>
+
+            <p>Военная защита данных.</p>
+
+        </div>
+
+        <div class="benefit">
+
+            <h3>Доступ к любому контенту</h3>
+
+            <p>Получите доступ к сайтам, которые вам нужны.</p>
+
+        </div>
+
+        <div class="benefit">
+
+            <h3>Скорость</h3>
+
+            <p>Наши серверы обеспечивают высокую скорость соединения.</p>
+
+        </div>
+
+        <div class="footer-text">
+
+            <p>© 2024 GhostVPN. Все права защищены. Свобода начинается с безопасности!</p>
+
+        </div>
+
+    </section>
 
 </body>
+
 </html>
