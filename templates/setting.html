@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Настройки</title>
+  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
+  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+
+  <!-- Большие иконки для Android и iOS -->
+  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
+  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
+  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
+
+  <!-- Иконка для Windows (favicon.ico) -->
+  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      background: url('../static/images/home-fon.png') no-repeat center center / cover;
+      color: #fff;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    .header {
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      color: #fff;
+      font-size: 2em;
+      position: absolute;
+      top: 20px;
+      left: 0;
+    }
+
+    .settings-content {
+      margin-top: 200px;
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+    }
+
+    .settings-section {
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .settings-section h2 {
+      margin-top: 0;
+    }
+
+    .back-button {
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <header class="header">
+      <h1>Настройки</h1>
+    </header>
+
+    <section class="settings-content">
+      <div class="settings-section">
+        <h2>Параметры учетной записи</h2>
+        <p>Изменение пароля, электронного адреса и других параметров учетной записи.</p>
+      </div>
+
+      <div class="settings-section">
+        <h2>Параметры безопасности</h2>
+        <p>Настройки конфиденциальности и безопасности.</p>
+      </div>
+
+      <button onclick="window.location.href='profile.html'" class="back-button">Назад</button>
+    </section>
+  </section>
+</body>
+</html>
