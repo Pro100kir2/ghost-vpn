@@ -22,7 +22,7 @@
     .hero {
       background: url('../static/images/home-fon.png') no-repeat center center / cover;
       color: #fff;
-      width: 100vw;
+      width: 100%;
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -49,46 +49,46 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
-      padding: 40px 20px; /* Уменьшение отступа сверху и снизу */
+      gap: 15px;
+      padding: 40px 20px;
       width: 100%;
       max-width: 1200px;
       box-sizing: border-box;
-      margin-top: 200px; /* Поднятие тарифов выше */
-      margin-bottom: 100px; /* Добавление небольшого отступа снизу */
+      margin-top: 200px;
+      margin-bottom: 100px;
     }
 
     .tariff-card {
       background-color: #2a2a2a;
       color: #fff;
-      padding: 15px;
+      padding: 12px;
       border-radius: 8px;
-      flex: 1 1 calc(25% - 20px); /* Гибкая ширина для адаптации */
-      max-width: 300px; /* Максимальная ширина карточки */
+      flex: 1 1 calc(22% - 15px);
+      max-width: 280px;
       box-sizing: border-box;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      transition: all 0.3s ease; /* Плавная анимация изменений */
+      transition: all 0.3s ease;
     }
 
     .tariff-card h2 {
       margin-top: 0;
-      font-size: 1.4em;
+      font-size: 1.3em;
     }
 
     .price {
-      font-size: 1.5em;
+      font-size: 1.4em;
       color: #1db954;
-      margin: 10px 0;
+      margin: 8px 0;
     }
 
     .slogan {
       font-style: italic;
-      color: #007bff; /* Синий цвет слогана */
-      margin-bottom: 15px;
+      color: #007bff;
+      margin-bottom: 12px;
     }
 
     .features {
@@ -97,33 +97,33 @@
       margin: 0;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       text-align: left;
       font-weight: bold;
     }
 
     .features li {
-      margin: 5px 0;
-      font-size: 0.9em;
+      margin: 4px 0;
+      font-size: 0.85em;
     }
 
     .features li::before {
       content: "+ ";
-      color: #1db954; /* Зеленый цвет для плюсов */
+      color: #1db954;
       font-weight: bold;
     }
 
     .pay-button {
       background-color: #1db954;
       color: #fff;
-      padding: 10px 20px;
+      padding: 8px 18px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 1em;
+      font-size: 0.95em;
       text-decoration: none;
       transition: background-color 0.3s ease;
-      margin-top: auto; /* Размещает кнопку внизу карточки */
+      margin-top: auto;
     }
 
     .pay-button:hover {
@@ -133,9 +133,9 @@
     /* Кнопка назад */
     .back-button {
       position: fixed;
-      bottom: 20px; /* Располагаем кнопку внизу */
+      bottom: 20px;
       left: 50%;
-      transform: translateX(-50%); /* Центрируем кнопку по горизонтали */
+      transform: translateX(-50%);
       background-color: #1db954;
       color: #fff;
       padding: 10px 20px;
@@ -154,13 +154,13 @@
     /* Адаптивные стили */
     @media (max-width: 1200px) {
       .tariff-card {
-        flex: 1 1 calc(33.33% - 20px); /* Три карточки в ряду */
+        flex: 1 1 calc(33.33% - 15px); /* Три карточки в ряду */
       }
     }
 
     @media (max-width: 800px) {
       .tariff-card {
-        flex: 1 1 calc(50% - 20px); /* Две карточки в ряду */
+        flex: 1 1 calc(50% - 15px); /* Две карточки в ряду */
       }
     }
 
@@ -233,6 +233,6 @@
   </section>
 
   <!-- Кнопка назад -->
-  <a href="javascript:history.back()" class="back-button">Назад</a>
+  <a href="/profile" class="back-button">Назад</a>
 </body>
 </html>
