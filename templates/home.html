@@ -1,21 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GhostVPN - Главная</title>
-  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
-  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
-
-  <!-- Большие иконки для Android и iOS -->
-  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
-  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
-  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
-
-  <!-- Иконка для Windows (favicon.ico) -->
-  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
-  <!-- Встроенные стили -->
+  <title>Тарифы</title>
   <style>
     /* Общие стили */
     body {
@@ -24,69 +12,227 @@
       background-color: #121212;
       color: #e0e0e0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
+    /* Hero секция */
     .hero {
-      background: url('../static/images/hooded-man.jpg') no-repeat center center / cover;
+      background: url('../static/images/home-fon.png') no-repeat center center / cover;
       color: #fff;
-      height: 100vh;
       width: 100%;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       position: relative;
-      padding: 20px;
-      box-sizing: border-box;
+      margin: 0;
     }
 
-    .form-container {
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      width: 300px;
+    /* Заголовок */
+    .header {
+      width: 100%;
+      padding: 10px;
       text-align: center;
+      color: #fff;
+      font-size: 2rem;
+      position: absolute;
+      top: 20px;
+      left: 0;
     }
 
-    h2 {
-      margin-bottom: 20px;
+    /* Стили для тарифов */
+    .tariffs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      padding: 40px 20px;
+      width: 100%;
+      max-width: 1200px;
+      box-sizing: border-box;
+      margin-top: 200px;
+      margin-bottom: 100px;
     }
 
-    .nav-buttons {
+    .tariff-card {
+      background-color: #2a2a2a;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      flex: 1 1 calc(22% - 15px);
+      max-width: 280px;
+      box-sizing: border-box;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
     }
 
-    .btn {
+    .tariff-card h2 {
+      margin-top: 0;
+      font-size: 1.3em;
+    }
+
+    .price {
+      font-size: 1.4em;
+      color: #1db954;
+      margin: 8px 0;
+    }
+
+    .slogan {
+      font-style: italic;
+      color: #007bff;
+      margin-bottom: 12px;
+    }
+
+    .features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .features li {
+      margin: 4px 0;
+      font-size: 0.85em;
+    }
+
+    .features li::before {
+      content: "+ ";
+      color: #1db954;
+      font-weight: bold;
+    }
+
+    .pay-button {
       background-color: #1db954;
       color: #fff;
-      padding: 10px;
+      padding: 8px 18px;
       border: none;
-      border-radius: 50px;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 0.95em;
       text-decoration: none;
-      display: inline-block;
+      transition: background-color 0.3s ease;
+      margin-top: auto;
     }
 
-    .btn:hover {
-      background-color: #1a8a3b;
+    .pay-button:hover {
+      background-color: #17a148;
+    }
+
+    /* Кнопка назад */
+    .back-button {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #17a148;
+    }
+
+    /* Адаптивные стили */
+    @media (max-width: 1200px) {
+      .tariff-card {
+        flex: 1 1 calc(33.33% - 15px); /* Три карточки в ряду */
+      }
+    }
+
+    @media (max-width: 800px) {
+      .tariff-card {
+        flex: 1 1 calc(50% - 15px); /* Две карточки в ряду */
+      }
+    }
+
+    @media (max-width: 500px) {
+      .tariff-card {
+        flex: 1 1 100%; /* Одна карточка в ряду */
+      }
     }
   </style>
 </head>
 <body>
   <section class="hero">
-    <div class="form-container">
-      <h2>Добро пожаловать на GhostVPN</h2>
-      <p>Вы успешно авторизованы!</p>
-      <div class="nav-buttons">
-      <a href="./profile" class="btn">Продолжить</a>
+    <header class="header">
+      <h1>Тарифы</h1>
+    </header>
+
+    <section class="tariffs">
+      <!-- Тариф 1 -->
+      <div class="tariff-card">
+        <h2>Тариф «Пробный ВПН на 3 дня»</h2>
+        <p class="price">Цена: Бесплатно</p>
+        <p class="slogan">Через эти 3 дня ваша жизнь разделится на до и после</p>
+        <ul class="features">
+          <li>Бесплатно</li>
+          <li>5 ГБ для ВПН</li>
+        </ul>
+        <a href="/pay/free-trial" class="pay-button">Попробовать бесплатно</a>
       </div>
-    </div>
+
+      <!-- Тариф 2 -->
+      <div class="tariff-card">
+        <h2>Тариф «Возьму на разок»</h2>
+        <p class="price">Цена: 200₽ / мес</p>
+        <p class="slogan">Тариф для тех, кто входит во вкус свободы</p>
+        <ul class="features">
+          <li>Самый низкий прайс</li>
+          <li>15 ГБ для ВПН</li>
+          <li>Конфиденциальность на уровне провайдеров</li>
+        </ul>
+        <a href="/pay/single-month" class="pay-button">Оплатить</a>
+      </div>
+
+      <!-- Тариф 3 -->
+      <div class="tariff-card">
+        <h2>Тариф «Ну, можно еще»</h2>
+        <p class="price">Цена: 450₽ / мес</p>
+        <p class="slogan">Свобода сладка, не так ли?</p>
+        <ul class="features">
+          <li>Всё, что у тарифа «На разок»</li>
+          <li>Доп. 25 ГБ</li>
+          <li>Относительно невысокая цена</li>
+          <li>Конфиденциальность на уровне государства</li>
+        </ul>
+        <a href="/pay/more-vpn" class="pay-button">Оплатить</a>
+      </div>
+
+      <!-- Тариф 4 -->
+      <div class="tariff-card">
+        <h2>Тариф «Мне как обычно»</h2>
+        <p class="price">Цена: 750₽ / мес</p>
+        <p class="slogan">Вы уже гуру и точно знаете, что вам нужно</p>
+        <ul class="features">
+          <li>Всё, что у тарифа «Ну, можно еще»</li>
+          <li>Неограниченный объем данных</li>
+          <li>Наивысший уровень конфиденциальности</li>
+        </ul>
+        <a href="/pay/usual" class="pay-button">Оплатить</a>
+      </div>
+    </section>
   </section>
+
+  <!-- Кнопка назад -->
+  <a href="/profile" class="back-button">Назад</a>
 </body>
 </html>

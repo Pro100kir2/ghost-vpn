@@ -4,17 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Тарифы</title>
-  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
-  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
-
-  <!-- Большие иконки для Android и iOS -->
-  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
-  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
-  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
-
-  <!-- Иконка для Windows (favicon.ico) -->
-  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
   <style>
     /* Общие стили */
     body {
@@ -25,7 +14,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       overflow-x: hidden;
     }
 
@@ -39,22 +28,20 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      overflow: hidden;
+      position: relative;
       margin: 0;
-      position: relative; /* Добавлено для контекста позиционирования */
     }
 
     /* Заголовок */
     .header {
-      background-color: rgba(29, 185, 84, 0.8); /* Прозрачный зеленый фон */
       width: 100%;
       padding: 10px;
       text-align: center;
       color: #fff;
-      position: absolute; /* Абсолютное позиционирование */
-      top: 20px; /* Положение сверху */
-      left: 0; /* Выровнять по левому краю */
-      transform: translateY(0); /* Центрирование по оси Y */
+      font-size: 2rem;
+      position: absolute;
+      top: 20px;
+      left: 0;
     }
 
     /* Стили для тарифов */
@@ -63,26 +50,28 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 20px;
-      padding: 160px;
+      padding: 40px 20px; /* Уменьшение отступа сверху и снизу */
       width: 100%;
       max-width: 1200px;
-      position: relative; /* Для позиционирования дочерних элементов */
+      box-sizing: border-box;
+      margin-top: 200px; /* Поднятие тарифов выше */
+      margin-bottom: 100px; /* Добавление небольшого отступа снизу */
     }
 
     .tariff-card {
       background-color: #2a2a2a;
       color: #fff;
-      padding: 20px;
+      padding: 15px;
       border-radius: 8px;
-      width: calc(25% - 20px);
-      min-width: 220px;
+      flex: 1 1 calc(25% - 20px); /* Гибкая ширина для адаптации */
+      max-width: 300px; /* Максимальная ширина карточки */
       box-sizing: border-box;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      height: 470px; /* Фиксированная высота для выравнивания */
+      transition: all 0.3s ease; /* Плавная анимация изменений */
     }
 
     .tariff-card h2 {
@@ -141,29 +130,53 @@
       background-color: #17a148;
     }
 
-    /* Стили для кнопки "Назад" */
+    /* Кнопка назад */
     .back-button {
-      background-color: #1db954; /* Цвет кнопки */
-      color: #fff; /* Цвет текста кнопки */
-      padding: 10px 20px; /* Отступы кнопки */
-      border: none; /* Убрать рамку */
-      border-radius: 5px; /* Закругление углов */
-      cursor: pointer; /* Указатель при наведении */
-      font-size: 1em; /* Размер шрифта */
-      text-decoration: none; /* Убрать подчеркивание */
-      position: absolute; /* Абсолютное позиционирование */
-      bottom: 80px; /* Отступ от нижней границы */
-      left: 50%; /* Центрирование по горизонтали */
-      transform: translateX(-50%); /* Центрирование кнопки */
+      position: fixed;
+      bottom: 20px; /* Располагаем кнопку внизу */
+      left: 50%;
+      transform: translateX(-50%); /* Центрируем кнопку по горизонтали */
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #17a148;
+    }
+
+    /* Адаптивные стили */
+    @media (max-width: 1200px) {
+      .tariff-card {
+        flex: 1 1 calc(33.33% - 20px); /* Три карточки в ряду */
+      }
+    }
+
+    @media (max-width: 800px) {
+      .tariff-card {
+        flex: 1 1 calc(50% - 20px); /* Две карточки в ряду */
+      }
+    }
+
+    @media (max-width: 500px) {
+      .tariff-card {
+        flex: 1 1 100%; /* Одна карточка в ряду */
+      }
     }
   </style>
 </head>
 <body>
-  <header class="header">
-    <h1>Тарифы</h1>
-  </header>
-
   <section class="hero">
+    <header class="header">
+      <h1>Тарифы</h1>
+    </header>
+
     <section class="tariffs">
       <!-- Тариф 1 -->
       <div class="tariff-card">
@@ -172,7 +185,7 @@
         <p class="slogan">Через эти 3 дня ваша жизнь разделится на до и после</p>
         <ul class="features">
           <li>Бесплатно</li>
-          <li>5 ГБ для ВПН </li>
+          <li>5 ГБ для ВПН</li>
         </ul>
         <a href="/pay/free-trial" class="pay-button">Попробовать бесплатно</a>
       </div>
@@ -194,7 +207,7 @@
       <div class="tariff-card">
         <h2>Тариф «Ну, можно еще»</h2>
         <p class="price">Цена: 450₽ / мес</p>
-        <p class="slogan">Свобода сладка, не так ли ?</p>
+        <p class="slogan">Свобода сладка, не так ли?</p>
         <ul class="features">
           <li>Всё, что у тарифа «На разок»</li>
           <li>Доп. 25 ГБ</li>
@@ -211,16 +224,15 @@
         <p class="slogan">Вы уже гуру и точно знаете, что вам нужно</p>
         <ul class="features">
           <li>Всё, что у тарифа «Ну, можно еще»</li>
-          <li>Доп. 25 ГБ</li>
-          <li>Самый надежный VPN мирового уровня</li>
-          <li>Автоматическая смена зоны VPN для стабильного соединения
+          <li>Неограниченный объем данных</li>
+          <li>Наивысший уровень конфиденциальности</li>
         </ul>
-        <a href="/pay/regular" class="pay-button">Оплатить</a>
+        <a href="/pay/usual" class="pay-button">Оплатить</a>
       </div>
     </section>
-
-    <!-- Кнопка назад -->
-    <a href="profile.html" class="back-button">Назад</a>
   </section>
+
+  <!-- Кнопка назад -->
+  <a href="javascript:history.back()" class="back-button">Назад</a>
 </body>
 </html>
