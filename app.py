@@ -131,7 +131,7 @@ def tariff():
     return render_template('tariff.html')
 
 
-@app.route('/my-profile.html')
+@app.route('/my-profile')
 @login_required
 def my_profile():
     user_id = session.get('user_id')
