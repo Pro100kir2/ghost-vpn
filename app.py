@@ -133,6 +133,15 @@ def profile():
 def tariff():
     return render_template('tariff.html')
 
+@app.route('/setting')
+@login_required
+def setting():
+    return render_template('setting.html')
+
+@app.route('/about')
+@login_required
+def about():
+    return render_template('about.html')
 @app.route('/my-home-profile')
 @login_required
 def my_home_profile():
