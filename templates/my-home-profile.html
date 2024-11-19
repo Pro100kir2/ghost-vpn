@@ -48,13 +48,15 @@
       position: absolute;
       top: 20px;
       left: 0;
+      margin-top: 50px;
     }
 
     .profile-content {
-      margin-top: 100px;
+      margin-top: 150px;
       width: 100%;
       max-width: 800px;
       padding: 20px;
+      text-align: center;
     }
 
     .profile-section {
@@ -62,6 +64,7 @@
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 20px;
+      text-align: center;
     }
 
     .cta-button {
@@ -80,6 +83,42 @@
       background-color: #17a148;
     }
 
+.nav-links {
+  position: absolute; /* Абсолютное позиционирование */
+  top: 60px; /* Расстояние от верхнего края */
+  left: 20px; /* Расстояние от левого края */
+  display: flex; /* Flexbox для горизонтального расположения */
+  gap: 15px; /* Расстояние между элементами */
+}
+
+.nav-links a {
+  color: #fff;
+  font-size: 1.1em;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-links a:hover {
+  background-color: #1db954;
+  color: #fff;
+}
+
+/* Медийные запросы для минимального экрана */
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column; /* Размещаем ссылки вертикально */
+    gap: 12px;
+  }
+
+  .nav-links a {
+    font-size: 1em;
+    padding: 6px 10px;
+  }
+}
+
     .back-button {
       background-color: #1db954;
       color: #fff;
@@ -90,22 +129,79 @@
       font-size: 1em;
       text-decoration: none;
       position: absolute;
-      bottom: 20px;
+      bottom: 50px;
       left: 50%;
       transform: translateX(-50%);
+      transition: background-color 0.3s ease;
     }
 
-    .nav-links {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
+    .back-button:hover {
+      background-color: #17a148;
     }
 
-    .nav-links a {
-      color: #1db954;
-      text-decoration: none;
-      margin: 0 15px;
-      font-size: 1.2em;
+    @media (max-width: 768px) {
+      .header {
+        font-size: 1.8em;
+        padding: 15px;
+      }
+
+      .profile-content {
+        margin-top: 120px;
+        padding: 15px;
+      }
+
+      .cta-button {
+        font-size: 0.9em;
+        padding: 8px 18px;
+      }
+
+      .nav-links {
+        top: 100px;
+        left: 10px;
+        gap: 12px;
+      }
+
+      .nav-links a {
+        font-size: 1em;
+        padding: 6px 10px;
+      }
+
+      .back-button {
+        font-size: 0.9em;
+        padding: 8px 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        font-size: 1.5em;
+      }
+
+      .profile-content {
+        margin-top: 100px;
+        padding: 10px;
+      }
+
+      .cta-button {
+        font-size: 0.8em;
+        padding: 6px 15px;
+      }
+
+      .nav-links {
+        top: 80px;
+        left: 5px;
+        gap: 10px;
+      }
+
+      .nav-links a {
+        font-size: 0.9em;
+        padding: 5px 8px;
+      }
+
+      .back-button {
+        font-size: 0.8em;
+        padding: 6px 15px;
+      }
     }
   </style>
 </head>
@@ -114,15 +210,36 @@
     <header class="header">
       <h1>Мой профиль</h1>
     </header>
+<div class="profile-content">
+  <!-- Добавляем отступ перед таблицей -->
+  <div style="margin-top: 150px;"> <!-- Этот блок создаёт нужный отступ -->
+    <table style="width: 100%; text-align: center; background-color: #2a2a2a; border-radius: 8px; padding: 20px;">
+      <thead>
+        <tr>
+          <th>Имя пользователя</th>
+          <th>Оставшееся время подписки</th>
+          <th>Статус подписки</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ username }}</td>
+          <td>{{ time_remaining }}</td>
+          <td>{{ status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-    <!-- Навигация с ссылками -->
+
     <div class="nav-links">
-      <a href="about.html">О нас</a>
-      <a href="tariff.html">Поменять тариф</a>
-      <a href="setting.html">Настройки</a>
+      <a href="./about">О нас</a>
+      <a href="./tariff">Поменять тариф</a>
+      <a href="./setting">Настройки</a>
     </div>
 
-    <a href="profile.html" class="back-button">Назад</a>
+    <a href="./profile" class="back-button">Назад</a>
   </section>
 </body>
 </html>

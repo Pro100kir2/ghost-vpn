@@ -11,14 +11,17 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
+# Генерация публичного и приватного ключей
 def generate_keys():
     public_key = ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
     private_key = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
     return public_key, private_key
 
+# Генерация уникального ID
 def generate_unique_id():
     return str(uuid.uuid4())
 
+# Соединение с базой данных
 def get_db_connection():
     db_url = os.environ.get('DATABASE_URL')
     result = urlparse(db_url)
@@ -130,58 +133,47 @@ def profile():
 def tariff():
     return render_template('tariff.html')
 
-
-@app.route('/my-profile')
+@app.route('/my-home-profile')
 @login_required
-def my_profile():
-    user_id = session.get('user_id')
+def my_home_profile():
+    user_id = session['user_id']
 
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Извлечение данных пользователя
-        cur.execute("""
-            SELECT username, subscription_end FROM users 
-            WHERE id = %s
-        """, (user_id,))
-        user_data = cur.fetchone()
+        # Получаем имя пользователя, время подписки (time) и статус
+        cur.execute("SELECT username, time, status FROM users WHERE id = %s", (user_id,))
+        user = cur.fetchone()
 
-        if not user_data:
-            flash('Пользователь не найден.', 'error')
+        if user:
+            username, time_left, status = user
+
+            # Проверяем, что time >= 0, чтобы отобразить оставшееся время
+            if time_left >= 0:
+                # Рассчитываем оставшееся время как количество дней
+                remaining_time = timedelta(days=time_left)
+                status = "Активен" if remaining_time.days > 0 else "Неактивен"
+                # Форматируем оставшееся время в формате "мес:дней"
+                time_remaining = f"{remaining_time.days // 30} мес {remaining_time.days % 30} дн" if remaining_time.days > 0 else "Подписка завершена"
+            else:
+                # Если time < 0, то подписка завершена
+                time_remaining = "Подписка завершена"
+                status = "Неактивен"
+
+            return render_template('my-home-profile.html', username=username, time_remaining=time_remaining, status=status)
+        else:
+            flash("Пользователь не найден.", "error")
             return redirect(url_for('profile'))
 
-        username = user_data[0]
-        subscription_end = user_data[1]  # Предполагается, что subscription_end хранится как дата или строка
-
-        # Логика определения времени и статуса
-        from datetime import datetime
-
-        current_date = datetime.now()
-        if subscription_end:
-            end_date = datetime.strptime(subscription_end, "%Y-%m-%d")  # Или другой формат даты
-            remaining_days = (end_date - current_date).days
-        else:
-            remaining_days = 0
-
-        subscription_status = "active" if remaining_days > 0 else "inactive"
-
-        # Форматирование оставшегося времени
-        formatted_time = f"{max(remaining_days, 0)} дн."
-
-        return render_template('my-home-profile.html',
-                               username=username,
-                               subscription_time=formatted_time,
-                               subscription_status=subscription_status)
-
     except Exception as e:
-        flash(f'Ошибка при загрузке профиля: {str(e)}', 'error')
+        flash(f'Ошибка при извлечении данных: {str(e)}', "error")
         return redirect(url_for('profile'))
+
     finally:
         if conn:
             conn.close()
-
 
 if __name__ == '__main__':
     app.run(debug=True)
