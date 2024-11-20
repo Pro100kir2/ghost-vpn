@@ -16,10 +16,20 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Секретный ключ для подписи сессий
 
 # Настройка использования Redis для хранения сессий
-app.config['SESSION_TYPE'] = 'redis'  # Используем Redis для хранения сессий
-app.config['SESSION_PERMANENT'] = False  # Сессия не будет постоянной по умолчанию
-app.config['SESSION_USE_SIGNER'] = True  # Используем подписку сессий для безопасности
-app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)  # Настройка подключения к Redis
+# Получаем URL для Redis из переменной окружения Heroku
+redis_url = os.getenv('rediss://:pe011198f11e8e603c771cbc04d5a6ce6f58d6035052d20ff9909f9027318c1e7@ec2-3-227-25-138.compute-1.amazonaws.com:26210')
+if redis_url:
+    # Если переменная окружения REDIS_URL существует, используем её
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+    app.config['SESSION_REDIS'] = redis.from_url(redis_url)  # Используем Redis из URL
+else:
+    # Если переменная окружения REDIS_URL не найдена, подключаем локальный Redis
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+    app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # Инициализация Flask-Session
 Session(app)
