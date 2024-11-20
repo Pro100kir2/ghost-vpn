@@ -24,6 +24,7 @@ if redis_url:
     app.config['SESSION_PERMANENT'] = False
     app.config['SESSION_USE_SIGNER'] = True
     app.config['SESSION_REDIS'] = redis.from_url(redis_url)  # Используем Redis из URL
+
 else:
     # Если переменная окружения REDIS_URL не найдена, подключаем локальный Redis
     app.config['SESSION_TYPE'] = 'redis'
