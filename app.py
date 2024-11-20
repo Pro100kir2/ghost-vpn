@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session, flash
-import psycopg2
+from flask_session import Session
+import redis
 import os
 import random
 import string
@@ -7,16 +8,20 @@ import uuid
 from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
-from flask_session import Session
+import psycopg2
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
 
 # Настройки для Flask-сессии
-app.secret_key = os.urandom(24)
-app.config['SESSION_TYPE'] = 'filesystem'  # Используем файловую систему для хранения сессий
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True
+app.secret_key = os.urandom(24)  # Секретный ключ для подписи сессий
+
+# Настройка использования Redis для хранения сессий
+app.config['SESSION_TYPE'] = 'redis'  # Используем Redis для хранения сессий
+app.config['SESSION_PERMANENT'] = False  # Сессия не будет постоянной по умолчанию
+app.config['SESSION_USE_SIGNER'] = True  # Используем подписку сессий для безопасности
+app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)  # Настройка подключения к Redis
+
+# Инициализация Flask-Session
 Session(app)
 
 # Генерация публичного и приватного ключей
