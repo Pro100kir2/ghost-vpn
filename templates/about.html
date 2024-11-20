@@ -1,10 +1,241 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost VPN</title>
+  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: url('../static/images/home-fon.png') no-repeat center center / cover;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-top: 20px;
+      color: #fff;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      color: #00bcd4;
+    }
+
+    .tabs {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .tab {
+      background: #282828;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .tab:hover {
+      background: #00bcd4;
+    }
+
+    .tab.active {
+      background: #00bcd4;
+    }
+
+    .content {
+      margin-top: 20px;
+      width: 80%;
+      max-width: 800px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 10px;
+      padding: 20px;
+      display: none;
+    }
+
+    .content.active {
+      display: block;
+    }
+
+    .team {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .team-member {
+      text-align: center;
+      background: #333;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .team-member img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .team-member h3 {
+      margin: 10px 0;
+      color: #00bcd4;
+    }
+
+    .steps {
+      margin: 20px 0;
+    }
+
+    .steps li {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .back-button {
+      margin-top: 30px;
+      background-color: #00bcd4;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .back-button:hover {
+      background-color: #0288d1;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>Ghost VPN</h1>
+    <p>Ваш портал в безопасный интернет с 2024 года</p>
+  </header>
 
+  <div class="tabs">
+    <div class="tab" data-tab="history">История создания Ghost-vpn</div>
+    <div class="tab" data-tab="team">Наша команда разработчиков</div>
+    <div class="tab" data-tab="technical">Технические материалы</div>
+    <div class="tab" data-tab="instructions">Инструкция по подключению</div>
+  </div>
+
+  <!-- История -->
+  <div class="content" id="history">
+    <h2>История создания Ghost VPN</h2>
+    <p>
+      В 2024 году группа опытных специалистов в области кибербезопасности объединилась для создания уникального проекта. Идея возникла во время конференции, где обсуждались угрозы приватности в эпоху глобального интернета. Все началось с простого вопроса: "Как защитить пользователей от слежки и цензуры, предоставив им полный контроль над своими данными?"<br><br>
+      После долгих ночных совещаний, экспериментов и исследования современных технологий шифрования, наша команда разработала Ghost VPN. Это не просто сервис, а идеология — уверенность в том, что каждый человек заслуживает свободы в цифровом пространстве.<br><br>
+      Мы взяли лучшие инструменты, такие как алгоритм шифрования уровня AES-256 и протокол WireGuard®, чтобы создать непробиваемый щит для ваших данных. Ghost VPN стал символом надежности и анонимности. Теперь мы являемся частью международного сообщества, которое объединяет миллионы пользователей, стремящихся к безопасной цифровой жизни.
+    </p>
+  </div>
+
+  <!-- Команда -->
+  <div class="content" id="team">
+    <h2>Наша команда разработчиков</h2>
+    <div class="team">
+      <div class="team-member">
+        <img src="/lupanov.jpg" alt="Лупанови Кирилл">
+        <h3>Лупанов Кирилл</h3>
+        <p>Руководитель, бекэнд разработка </p>
+      </div>
+      <div class="team-member">
+        <img src="/arastianovich.jpg" alt="Михаил Арастянович">
+        <h3>Михаил Арастянович</h3>
+        <p>Специалист по криптографии, разрабатывал алгоритмы шифрования уровня AES-256 для банковских систем.</p>
+      </div>
+      <div class="team-member">
+        <img src="/smirnova.jpg" alt="Анна Смирнова">
+        <h3>Анна Сноу</h3>
+        <p>Эксперт по сетевой безопасности. Более 10 лет работает с протоколами VPN и защитой данных.</p>
+      </div>
+      <div class="team-member">
+        <img src="/soboleva.jpg" alt="Соболева Александра">
+        <h3>Соболева Александра</h3>
+        <p>Графический дизайнер и фотограф</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Технические материалы -->
+  <div class="content" id="technical">
+    <h2>Технические материалы</h2>
+    <p>
+      Ghost VPN основан на современных технологиях. Мы используем алгоритм AES-256, который на данный момент считается непробиваемым методом шифрования. Этот алгоритм используется для защиты государственных данных. Подключение осуществляется через протокол WireGuard® — легкий, высокоскоростной, но невероятно надежный стандарт. Конфигурация осуществляется через опенсорсный ресурс AmneziaWG, что обеспечивает полную прозрачность процесса.<br><br>
+      Наши серверы защищены многоуровневыми фильтрами фаервола, которые предотвращают любые несанкционированные попытки вторжения. Ghost VPN не хранит логов пользователей, предоставляя настоящую анонимность.
+    </p>
+  </div>
+
+  <!-- Инструкция -->
+  <div class="content" id="instructions">
+    <h2>Инструкция по подключению</h2>
+    <ol class="steps">
+      <li>Зарегистрируйтесь на нашем сайте.</li>
+      <li>Сохраните публичный и приватный ключ.</li>
+      <li>Войдите в систему с использованием своих данных.</li>
+      <li>Выберите подходящий тариф и оплатите его.</li>
+      <li>Получите конфигурационный файл для подключения.</li>
+      <li>Скачайте приложение <a href="https://amnezia.org/ru/downloads" target="_blank"><strong>Amnezia VPN</strong></a>.</li>
+      <li>Откройте приложение и добавьте "Файл с настройками подключения".</li>
+      <li>Нажмите "Импорт из файла или архива" и выберите ваш конфигурационный файл.</li>
+      <li>Наслаждайтесь свободным и защищенным интернетом! ❤️</li>
+    </ol>
+  </div>
+
+  <!-- Кнопка назад -->
+  <div class="back-button" id="backButton">Назад</div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.content');
+    let previousTabId = null;
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Сохраняем текущую вкладку перед сменой
+        if (previousTabId !== null) {
+          previousTabId = tab.dataset.tab;
+        }
+
+        // Переключаем вкладки        // Переключаем вкладки
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Переключаем содержимое
+        contents.forEach(content => content.classList.remove('active'));
+        const activeTabContent = document.getElementById(tab.dataset.tab);
+        activeTabContent.classList.add('active');
+      });
+    });
+
+    // Кнопка назад
+    const backButton = document.getElementById('backButton');
+    backButton.addEventListener('click', () => {
+      if (previousTabId) {
+        const previousTab = document.querySelector(`.tab[data-tab="${previousTabId}"]`);
+        const previousContent = document.getElementById(previousTabId);
+
+        // Переключаем вкладки на предыдущую
+        tabs.forEach(t => t.classList.remove('active'));
+        previousTab.classList.add('active');
+
+        // Переключаем содержимое на предыдущую вкладку
+        contents.forEach(content => content.classList.remove('active'));
+        previousContent.classList.add('active');
+      }
+    });
+  </script>
 </body>
 </html>
