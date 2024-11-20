@@ -17,7 +17,9 @@ app.secret_key = os.urandom(24)  # Секретный ключ для подпи
 
 # Настройка использования Redis для хранения сессий
 # Получаем URL для Redis из переменной окружения Heroku
-redis_url = os.getenv('rediss://:pe011198f11e8e603c771cbc04d5a6ce6f58d6035052d20ff9909f9027318c1e7@ec2-3-227-25-138.compute-1.amazonaws.com:26210')
+# Получаем URL для Redis из переменной окружения
+redis_url = os.getenv('REDIS_URL')  # Получаем правильную переменную окружения
+
 if redis_url:
     # Если переменная окружения REDIS_URL существует, используем её
     app.config['SESSION_TYPE'] = 'redis'
