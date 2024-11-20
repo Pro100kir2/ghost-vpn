@@ -148,26 +148,32 @@ def logout():
 
 # Маршруты с защитой
 @app.route('/home')
+@login_required
 def home():
     return render_template('home.html')
 
 @app.route('/profile')
+@login_required
 def profile():
     return render_template('profile.html')
 
 @app.route('/tariff')
+@login_required
 def tariff():
     return render_template('tariff.html')
 
 @app.route('/setting')
+@login_required
 def setting():
     return render_template('setting.html')
 
 @app.route('/about')
+@login_required
 def about():
     return render_template('about.html')
 
 @app.route('/my-home-profile')
+@login_required
 def my_home_profile():
     user_id = session['user_id']
 
