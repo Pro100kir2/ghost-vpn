@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from flask_session import Session
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'
 
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
