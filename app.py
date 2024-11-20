@@ -11,6 +11,7 @@ from flask_session import Session
 
 app = Flask(__name__)
 
+
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'  # Используем файловую систему для хранения сессий
