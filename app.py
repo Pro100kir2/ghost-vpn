@@ -31,15 +31,21 @@ def generate_unique_id():
 
 # Соединение с базой данных
 def get_db_connection():
-    db_url = os.environ.get('DATABASE_URL')
-    result = urlparse(db_url)
-    return psycopg2.connect(
-        dbname=result.path[1:],
-        user=result.username,
-        password=result.password,
-        host=result.hostname,
-        port=result.port
-    )
+    try:
+        db_url = os.environ.get('DATABASE_URL')
+        result = urlparse(db_url)
+        connection = psycopg2.connect(
+            dbname=result.path[1:],
+            user=result.username,
+            password=result.password,
+            host=result.hostname,
+            port=result.port,
+            sslmode='require'  # Обязательно для подключения с SSL
+        )
+        return connection
+    except Exception as e:
+        print(f"Ошибка при подключении к базе данных: {e}")
+        raise
 
 # Декоратор для защиты маршрутов
 def login_required(f):
