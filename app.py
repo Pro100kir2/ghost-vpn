@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session, flash
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, flash
 import psycopg2
 import os
 import random
@@ -7,17 +7,9 @@ import uuid
 from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
-from flask_session import Session
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
-
-# Настройки для Flask-сессии
-app.secret_key = os.urandom(24)
-app.config['SESSION_TYPE'] = 'filesystem'  # Используем файловую систему для хранения сессий
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True
-Session(app)
 
 # Генерация публичного и приватного ключей
 def generate_keys():
@@ -31,43 +23,33 @@ def generate_unique_id():
 
 # Соединение с базой данных
 def get_db_connection():
-    try:
-        db_url = os.environ.get('DATABASE_URL')
-        result = urlparse(db_url)
-        connection = psycopg2.connect(
-            dbname=result.path[1:],
-            user=result.username,
-            password=result.password,
-            host=result.hostname,
-            port=result.port,
-            sslmode='require'  # Обязательно для подключения с SSL
-        )
-        return connection
-    except Exception as e:
-        print(f"Ошибка при подключении к базе данных: {e}")
-        raise
+    db_url = os.environ.get('DATABASE_URL')
+    result = urlparse(db_url)
+    return psycopg2.connect(
+        dbname=result.path[1:],
+        user=result.username,
+        password=result.password,
+        host=result.hostname,
+        port=result.port
+    )
 
 # Декоратор для защиты маршрутов
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash("Доступ запрещен! Пожалуйста, авторизуйтесь.", "error")
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
-# Маршрут для главной страницы
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
-# Маршрут для страницы регистрации
 @app.route('/registration', methods=['GET'])
 def registration_page():
     return render_template('registration.html')
 
-# Обработка регистрации
 @app.route('/register', methods=['POST'])
 def register():
     data = request.form
@@ -104,13 +86,11 @@ def register():
         if conn:
             conn.close()
 
-# Проверка, занят ли пользователь
 def is_username_taken(cursor, username):
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
     count = cursor.fetchone()[0]
     return count > 0
 
-# Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -126,7 +106,6 @@ def login():
 
             if user:
                 session['user_id'] = user[0]
-                session.permanent = True  # Сессия останется активной
                 return redirect(url_for('home'))
             else:
                 flash("Неверное имя пользователя или публичный ключ!", "error")
@@ -139,14 +118,6 @@ def login():
                 conn.close()
     return render_template('login.html')
 
-# Маршрут для выхода
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash("Вы успешно вышли из системы", "success")
-    return redirect(url_for('index'))
-
-# Маршруты с защитой
 @app.route('/home')
 @login_required
 def home():
@@ -161,16 +132,6 @@ def profile():
 @login_required
 def tariff():
     return render_template('tariff.html')
-
-@app.route('/setting')
-@login_required
-def setting():
-    return render_template('setting.html')
-
-@app.route('/about')
-@login_required
-def about():
-    return render_template('about.html')
 
 @app.route('/my-home-profile')
 @login_required
@@ -213,14 +174,6 @@ def my_home_profile():
     finally:
         if conn:
             conn.close()
-
-# Заголовки для предотвращения кэширования
-@app.after_request
-def add_no_cache_headers(response):
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
