@@ -69,7 +69,7 @@ def register():
             flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
             return render_template('registration.html', username=username, email=email)
 
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, subscription_end) VALUES (%s, %s, %s, %s, %s, %s)',
+        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time) VALUES (%s, %s, %s, %s, %s, %s)',
                     (unique_id, username, email, public_key, private_key, subscription_end))
         conn.commit()
         cur.close()
