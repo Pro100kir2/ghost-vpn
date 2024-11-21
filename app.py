@@ -58,7 +58,7 @@ def register():
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
-    subscription_end = datetime.now() + timedelta(days=30)  # Добавляем 30 дней подписки
+    initial_days = 3  # По умолчанию добавляется 3 дня подписки
 
     conn = None
     try:
@@ -69,8 +69,9 @@ def register():
             flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
             return render_template('registration.html', username=username, email=email)
 
+        # Добавляем начальное время подписки (3 дня)
         cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time) VALUES (%s, %s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key, subscription_end))
+                    (unique_id, username, email, public_key, private_key, initial_days))
         conn.commit()
         cur.close()
 
@@ -128,10 +129,51 @@ def home():
 def profile():
     return render_template('profile.html')
 
-@app.route('/tariff')
+@app.route('/tariff', methods=['GET'])
 @login_required
 def tariff():
     return render_template('tariff.html')
+
+@app.route('/pay/<tariff_name>', methods=['GET'])
+@login_required
+def pay_tariff(tariff_name):
+    user_id = session['user_id']
+    days_to_add = 0
+
+    # Логика, соответствующая тарифам
+    if tariff_name == 'free-trial':
+        days_to_add = 3
+    elif tariff_name == 'single-month':
+        days_to_add = 30
+    elif tariff_name == 'more-vpn':
+        days_to_add = 90
+    elif tariff_name == 'usual':
+        days_to_add = 180
+    else:
+        flash('Неизвестный тарифный план.', 'error')
+        return redirect(url_for('tariff'))
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Обновляем время подписки
+        cur.execute("UPDATE users SET time = time + %s WHERE id = %s", (days_to_add, user_id))
+        conn.commit()
+        cur.close()
+
+        flash(f'Ваш тариф успешно обновлён: добавлено {days_to_add} дней!', 'success')
+        return redirect(url_for('my_home_profile'))
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        flash(f'Ошибка при обновлении тарифа: {str(e)}', 'error')
+        return redirect(url_for('tariff'))
+    finally:
+        if conn:
+            conn.close()
 
 @app.route('/my-home-profile')
 @login_required
@@ -150,15 +192,11 @@ def my_home_profile():
         if user:
             username, time_left, status = user
 
-            # Проверяем, что time >= 0, чтобы отобразить оставшееся время
             if time_left >= 0:
-                # Рассчитываем оставшееся время как количество дней
                 remaining_time = timedelta(days=time_left)
                 status = "Активен" if remaining_time.days > 0 else "Неактивен"
-                # Форматируем оставшееся время в формате "мес:дней"
                 time_remaining = f"{remaining_time.days // 30} мес {remaining_time.days % 30} дн" if remaining_time.days > 0 else "Подписка завершена"
             else:
-                # Если time < 0, то подписка завершена
                 time_remaining = "Подписка завершена"
                 status = "Неактивен"
 
@@ -170,7 +208,6 @@ def my_home_profile():
     except Exception as e:
         flash(f'Ошибка при извлечении данных: {str(e)}', "error")
         return redirect(url_for('profile'))
-
     finally:
         if conn:
             conn.close()
