@@ -69,7 +69,7 @@ def register():
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
-    subscription_end = datetime.now() + timedelta(days=30)  # Добавляем 30 дней подписки
+    initial_days = 3  # По умолчанию добавляется 3 дня подписки
 
     conn = None
     try:
@@ -80,8 +80,9 @@ def register():
             flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
             return render_template('registration.html', username=username, email=email)
 
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, subscription_end) VALUES (%s, %s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key, subscription_end))
+        # Добавляем начальное время подписки (3 дня)
+        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time) VALUES (%s, %s, %s, %s, %s, %s)',
+                    (unique_id, username, email, public_key, private_key, initial_days))
         conn.commit()
         cur.close()
 
@@ -97,13 +98,14 @@ def register():
         if conn:
             conn.close()
 
-# Проверка, занят ли пользователь
-def is_username_taken(cursor, username):
-    cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
-    count = cursor.fetchone()[0]
-    return count > 0
+# Маршрут для выхода
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Вы успешно вышли из системы", "success")
+    return redirect(url_for('index'))
 
-# Маршрут для входа
+# Маршруты с защитой
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -119,7 +121,6 @@ def login():
 
             if user:
                 session['user_id'] = user[0]
-                session.permanent = True  # Сессия останется активной
                 return redirect(url_for('home'))
             else:
                 flash("Неверное имя пользователя или публичный ключ!", "error")
@@ -131,15 +132,6 @@ def login():
             if conn:
                 conn.close()
     return render_template('login.html')
-
-# Маршрут для выхода
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash("Вы успешно вышли из системы", "success")
-    return redirect(url_for('index'))
-
-# Маршруты с защитой
 @app.route('/home')
 @login_required
 def home():
