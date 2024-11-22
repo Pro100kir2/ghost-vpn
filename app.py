@@ -127,7 +127,7 @@ def register():
 
         # Сохраняем пользователя, но не подтверждаем его
         cur.execute(
-            'INSERT INTO users (id, username, email, public_key, private_key, time, trial_used, telegram_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+            'INSERT INTO users (id, username, email, public_key, private_key, time, trial_used) VALUES (%s, %s, %s, %s, %s, %s, %s )',
             (unique_id, username, email, public_key, private_key, 0, False, telegram_id))
         conn.commit()
 
