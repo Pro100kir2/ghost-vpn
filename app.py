@@ -13,10 +13,6 @@ app = Flask(__name__)
 
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
-app.config['SESSION_TYPE'] = 'filesystem'  # Используем файловую систему для хранения сессий
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True
-Session(app)
 
 # Генерация публичного и приватного ключей
 def generate_keys():
@@ -97,6 +93,11 @@ def register():
     finally:
         if conn:
             conn.close()
+
+def is_username_taken(cursor, username):
+    cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
+    count = cursor.fetchone()[0]
+    return count > 0
 
 # Маршрут для выхода
 @app.route('/logout')
