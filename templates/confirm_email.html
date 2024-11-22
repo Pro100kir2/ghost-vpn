@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подтверждение Email</title>
+  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
+  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .hero {
+      background: url('../static/images/hooded-man.jpg') no-repeat center center / cover;
+      color: #fff;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .form-container {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 50px;
+    }
+    button {
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      width: 90%;
+    }
+    button:hover {
+      background-color: #1a8a3b;
+    }
+    .flash-message {
+      color: red;
+      margin-bottom: 15px;
+    }
+    .toggle-button {
+      margin-top: 20px;
+      color: #1db954;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="form-container">
+      <h2>Подтверждение Email</h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div id="flash-container">
+            {% for category, message in messages %}
+              <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      <form action="/confirm-email" method="POST">
+        <label for="confirmation-code">Введите код подтверждения</label>
+        <input type="text" id="confirmation-code" name="code" required>
+        <button type="submit">Подтвердить</button>
+      </form>
+
+      <div>
+        <div class="toggle-button" onclick="location.href='/registration'">Назад к регистрации</div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
