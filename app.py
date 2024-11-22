@@ -8,11 +8,16 @@ from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
 from flask_session import Session
+import requests
 
 app = Flask(__name__)
 
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
+
+# reCAPTCHA ключи
+RECAPTCHA_SITE_KEY = "6LcHxYYqAAAAABYAG2B__k_6MIiLBY4yf5_cPym2"  # Публичный ключ
+RECAPTCHA_SECRET_KEY = "6LcHxYYqAAAAAFz_b7SB4p52ayqL1ubsg9hWyjgx"  # Секретный ключ
 
 # Генерация публичного и приватного ключей
 def generate_keys():
@@ -36,6 +41,20 @@ def get_db_connection():
         port=result.port
     )
 
+# Проверка reCAPTCHA
+def verify_recaptcha(response_token):
+    url = "https://www.google.com/recaptcha/api/siteverify"
+    data = {'secret': RECAPTCHA_SECRET_KEY, 'response': response_token}
+    response = requests.post(url, data=data)
+    result = response.json()
+    return result.get('success', False)
+
+# Проверка уникальности имени пользователя
+def is_username_taken(cursor, username):
+    cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
+    count = cursor.fetchone()[0]
+    return count > 0
+
 # Декоратор для защиты маршрутов
 def login_required(f):
     @wraps(f)
@@ -54,7 +73,7 @@ def index():
 # Маршрут для страницы регистрации
 @app.route('/registration', methods=['GET'])
 def registration_page():
-    return render_template('registration.html')
+    return render_template('registration.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
 # Обработка регистрации
 @app.route('/register', methods=['POST'])
@@ -62,10 +81,15 @@ def register():
     data = request.form
     username = data.get('username')
     email = data.get('email')
+    recaptcha_response = data.get('g-recaptcha-response')
+
+    # Проверяем reCAPTCHA
+    if not verify_recaptcha(recaptcha_response):
+        flash('Пожалуйста, подтвердите, что вы не робот.', 'error')
+        return redirect(url_for('registration_page'))
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
-    initial_days = 3  # По умолчанию добавляется 3 дня подписки
 
     conn = None
     try:
@@ -73,40 +97,25 @@ def register():
         cur = conn.cursor()
 
         if is_username_taken(cur, username):
-            flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
-            return render_template('registration.html', username=username, email=email)
+            flash('Имя пользователя уже занято, выберите другое.', 'username_taken')
+            return render_template('registration.html', username=username, email=email, recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
-        # Добавляем начальное время подписки (3 дня)
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time) VALUES (%s, %s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key, initial_days))
+        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time, trial_used) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                    (unique_id, username, email, public_key, private_key, 0, False))
         conn.commit()
-        cur.close()
 
-        flash('Поздравляем с успешной регистрацией!', 'success')
-        return render_template('new_user.html', message='Поздравляем с успешной регистрацией!', public_key=public_key, private_key=private_key)
-
+        flash('Регистрация успешна! Проверьте почту для подтверждения.', 'success')
+        return redirect(url_for('login'))
     except Exception as e:
         if conn:
             conn.rollback()
-        flash(f'Ошибка при добавлении пользователя: {str(e)}', 'error')
-        return render_template('registration.html', username=username, email=email)
+        flash(f'Ошибка при регистрации: {str(e)}', 'error')
+        return render_template('registration.html', username=username, email=email, recaptcha_site_key=RECAPTCHA_SITE_KEY)
     finally:
         if conn:
             conn.close()
 
-def is_username_taken(cursor, username):
-    cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
-    count = cursor.fetchone()[0]
-    return count > 0
-
-# Маршрут для выхода
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash("Вы успешно вышли из системы", "success")
-    return redirect(url_for('index'))
-
-# Маршруты с защитой
+# Маршрут для страницы входа
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -133,72 +142,6 @@ def login():
             if conn:
                 conn.close()
     return render_template('login.html')
-@app.route('/home')
-@login_required
-def home():
-    return render_template('home.html')
-
-@app.route('/profile')
-@login_required
-def profile():
-    return render_template('profile.html')
-
-@app.route('/tariff')
-@login_required
-def tariff():
-    return render_template('tariff.html')
-
-@app.route('/setting')
-@login_required
-def setting():
-    return render_template('setting.html')
-
-@app.route('/about')
-@login_required
-def about():
-    return render_template('about.html')
-
-@app.route('/my-home-profile')
-@login_required
-def my_home_profile():
-    user_id = session['user_id']
-
-    conn = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Получаем имя пользователя, время подписки (time) и статус
-        cur.execute("SELECT username, time, status FROM users WHERE id = %s", (user_id,))
-        user = cur.fetchone()
-
-        if user:
-            username, time_left, status = user
-
-            # Проверяем, что time >= 0, чтобы отобразить оставшееся время
-            if time_left >= 0:
-                # Рассчитываем оставшееся время как количество дней
-                remaining_time = timedelta(days=time_left)
-                status = "Активен" if remaining_time.days > 0 else "Неактивен"
-                # Форматируем оставшееся время в формате "мес:дней"
-                time_remaining = f"{remaining_time.days // 30} мес {remaining_time.days % 30} дн" if remaining_time.days > 0 else "Подписка завершена"
-            else:
-                # Если time < 0, то подписка завершена
-                time_remaining = "Подписка завершена"
-                status = "Неактивен"
-
-            return render_template('my-home-profile.html', username=username, time_remaining=time_remaining, status=status)
-        else:
-            flash("Пользователь не найден.", "error")
-            return redirect(url_for('profile'))
-
-    except Exception as e:
-        flash(f'Ошибка при извлечении данных: {str(e)}', "error")
-        return redirect(url_for('profile'))
-
-    finally:
-        if conn:
-            conn.close()
 
 # Заголовки для предотвращения кэширования
 @app.after_request
