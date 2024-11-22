@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify, flash
+from flask import Flask, request, render_template, redirect, url_for, session, flash
 import psycopg2
 import os
 import random
@@ -7,9 +7,16 @@ import uuid
 from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
+from flask_session import Session
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+
+# Настройки для Flask-сессии
+app.secret_key = os.urandom(24)
+app.config['SESSION_TYPE'] = 'filesystem'  # Используем файловую систему для хранения сессий
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+Session(app)
 
 # Генерация публичного и приватного ключей
 def generate_keys():
@@ -38,18 +45,22 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            flash("Доступ запрещен! Пожалуйста, авторизуйтесь.", "error")
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
+# Маршрут для главной страницы
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
+# Маршрут для страницы регистрации
 @app.route('/registration', methods=['GET'])
 def registration_page():
     return render_template('registration.html')
 
+# Обработка регистрации
 @app.route('/register', methods=['POST'])
 def register():
     data = request.form
@@ -58,7 +69,7 @@ def register():
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
-    initial_days = 3  # По умолчанию добавляется 3 дня подписки
+    subscription_end = datetime.now() + timedelta(days=30)  # Добавляем 30 дней подписки
 
     conn = None
     try:
@@ -69,9 +80,8 @@ def register():
             flash('Извините, но пользователь с таким именем уже есть, выберите другой.', 'username_taken')
             return render_template('registration.html', username=username, email=email)
 
-        # Добавляем начальное время подписки (3 дня)
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time) VALUES (%s, %s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key, initial_days))
+        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, subscription_end) VALUES (%s, %s, %s, %s, %s, %s)',
+                    (unique_id, username, email, public_key, private_key, subscription_end))
         conn.commit()
         cur.close()
 
@@ -87,11 +97,13 @@ def register():
         if conn:
             conn.close()
 
+# Проверка, занят ли пользователь
 def is_username_taken(cursor, username):
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
     count = cursor.fetchone()[0]
     return count > 0
 
+# Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -107,6 +119,7 @@ def login():
 
             if user:
                 session['user_id'] = user[0]
+                session.permanent = True  # Сессия останется активной
                 return redirect(url_for('home'))
             else:
                 flash("Неверное имя пользователя или публичный ключ!", "error")
@@ -119,6 +132,14 @@ def login():
                 conn.close()
     return render_template('login.html')
 
+# Маршрут для выхода
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Вы успешно вышли из системы", "success")
+    return redirect(url_for('index'))
+
+# Маршруты с защитой
 @app.route('/home')
 @login_required
 def home():
@@ -129,51 +150,20 @@ def home():
 def profile():
     return render_template('profile.html')
 
-@app.route('/tariff', methods=['GET'])
+@app.route('/tariff')
 @login_required
 def tariff():
     return render_template('tariff.html')
 
-@app.route('/pay/<tariff_name>', methods=['GET'])
+@app.route('/setting')
 @login_required
-def pay_tariff(tariff_name):
-    user_id = session['user_id']
-    days_to_add = 0
+def setting():
+    return render_template('setting.html')
 
-    # Логика, соответствующая тарифам
-    if tariff_name == 'free-trial':
-        days_to_add = 3
-    elif tariff_name == 'single-month':
-        days_to_add = 30
-    elif tariff_name == 'more-vpn':
-        days_to_add = 90
-    elif tariff_name == 'usual':
-        days_to_add = 180
-    else:
-        flash('Неизвестный тарифный план.', 'error')
-        return redirect(url_for('tariff'))
-
-    conn = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Обновляем время подписки
-        cur.execute("UPDATE users SET time = time + %s WHERE id = %s", (days_to_add, user_id))
-        conn.commit()
-        cur.close()
-
-        flash(f'Ваш тариф успешно обновлён: добавлено {days_to_add} дней!', 'success')
-        return redirect(url_for('my_home_profile'))
-
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        flash(f'Ошибка при обновлении тарифа: {str(e)}', 'error')
-        return redirect(url_for('tariff'))
-    finally:
-        if conn:
-            conn.close()
+@app.route('/about')
+@login_required
+def about():
+    return render_template('about.html')
 
 @app.route('/my-home-profile')
 @login_required
@@ -192,11 +182,15 @@ def my_home_profile():
         if user:
             username, time_left, status = user
 
+            # Проверяем, что time >= 0, чтобы отобразить оставшееся время
             if time_left >= 0:
+                # Рассчитываем оставшееся время как количество дней
                 remaining_time = timedelta(days=time_left)
                 status = "Активен" if remaining_time.days > 0 else "Неактивен"
+                # Форматируем оставшееся время в формате "мес:дней"
                 time_remaining = f"{remaining_time.days // 30} мес {remaining_time.days % 30} дн" if remaining_time.days > 0 else "Подписка завершена"
             else:
+                # Если time < 0, то подписка завершена
                 time_remaining = "Подписка завершена"
                 status = "Неактивен"
 
@@ -208,9 +202,18 @@ def my_home_profile():
     except Exception as e:
         flash(f'Ошибка при извлечении данных: {str(e)}', "error")
         return redirect(url_for('profile'))
+
     finally:
         if conn:
             conn.close()
+
+# Заголовки для предотвращения кэширования
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
