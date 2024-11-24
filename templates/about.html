@@ -5,7 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ghost VPN</title>
   <link rel="icon" href="/static/images/favicon1.png" type="image/png">
-  <style>
+  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+
+  <!-- Большие иконки для Android и iOS -->
+  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
+  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
+  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
+
+  <!-- Иконка для Windows (favicon.ico) -->
+  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">  <style>
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
@@ -127,7 +136,7 @@
 
   <div class="tabs">
     <div class="tab" data-tab="history">История создания Ghost-vpn</div>
-    <div class="tab" data-tab="team">Наша команда разработчиков</div>
+    <div class="tab" data-tab="contact">Связь с нами</div>
     <div class="tab" data-tab="technical">Технические материалы</div>
     <div class="tab" data-tab="instructions">Инструкция по подключению</div>
   </div>
@@ -139,34 +148,19 @@
       В 2024 году группа опытных специалистов в области кибербезопасности объединилась для создания уникального проекта. Идея возникла во время конференции, где обсуждались угрозы приватности в эпоху глобального интернета. Все началось с простого вопроса: "Как защитить пользователей от слежки и цензуры, предоставив им полный контроль над своими данными?"<br><br>
       После долгих ночных совещаний, экспериментов и исследования современных технологий шифрования, наша команда разработала Ghost VPN. Это не просто сервис, а идеология — уверенность в том, что каждый человек заслуживает свободы в цифровом пространстве.<br><br>
       Мы взяли лучшие инструменты, такие как алгоритм шифрования уровня AES-256 и протокол WireGuard®, чтобы создать непробиваемый щит для ваших данных. Ghost VPN стал символом надежности и анонимности. Теперь мы являемся частью международного сообщества, которое объединяет миллионы пользователей, стремящихся к безопасной цифровой жизни.
+    <footer>
+    <ul>
+      <p><strong>Ознакомиться с нашими политиками можно перейдя по ссылке:</strong> <a href="./privacy-policy">Privacy Policy</a></p>
+    </ul>
+</footer>
     </p>
   </div>
-
-  <!-- Команда -->
-  <div class="content" id="team">
-    <h2>Наша команда разработчиков</h2>
-    <div class="team">
-      <div class="team-member">
-        <img src="/lupanov.jpg" alt="Лупанови Кирилл">
-        <h3>Лупанов Кирилл</h3>
-        <p>Руководитель, бекэнд разработка </p>
-      </div>
-      <div class="team-member">
-        <img src="/arastianovich.jpg" alt="Михаил Арастянович">
-        <h3>Михаил Арастянович</h3>
-        <p>Специалист по криптографии, разрабатывал алгоритмы шифрования уровня AES-256 для банковских систем.</p>
-      </div>
-      <div class="team-member">
-        <img src="/smirnova.jpg" alt="Анна Смирнова">
-        <h3>Анна Сноу</h3>
-        <p>Эксперт по сетевой безопасности. Более 10 лет работает с протоколами VPN и защитой данных.</p>
-      </div>
-      <div class="team-member">
-        <img src="/soboleva.jpg" alt="Соболева Александра">
-        <h3>Соболева Александра</h3>
-        <p>Графический дизайнер и фотограф</p>
-      </div>
-    </div>
+  <!-- Связь с нами -->
+  <div class="content" id="contact">
+    <h2>Связь с нами</h2>
+    <p>Если у вас возникли вопросы или проблемы, пожалуйста, свяжитесь с нашей службой поддержки:</p>
+    <p><strong>Телефон:</strong> 89776985620</p>
+    <p><strong>Телеграмм Бот:</strong> <a href="https://t.me/ghostvpnsupport_bot">@ghostvpnsupport_bot</a></p>
   </div>
 
   <!-- Технические материалы -->
@@ -194,7 +188,6 @@
     </ol>
   </div>
 
-  <!-- Кнопка назад -->
   <div class="back-button" id="backButton">Назад</div>
 
   <script>
@@ -209,7 +202,7 @@
           previousTabId = tab.dataset.tab;
         }
 
-        // Переключаем вкладки        // Переключаем вкладки
+        // Переключаем вкладки
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
 
