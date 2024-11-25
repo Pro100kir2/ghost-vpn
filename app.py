@@ -4,13 +4,13 @@ import os
 import random
 import string
 import uuid
-from urllib.parse import urlparse
+import requests  # Потребуется для reCAPTCHA и отправки сообщений в Telegram
 from functools import wraps
 from datetime import timedelta
-import smtplib
-from email.mime.text import MIMEText
+from urllib.parse import urlparse
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
@@ -45,7 +45,7 @@ def get_db_connection():
 def verify_recaptcha(response_token):
     url = "https://www.google.com/recaptcha/api/siteverify"
     data = {'secret': RECAPTCHA_SECRET_KEY, 'response': response_token}
-    response = requests.post(url, data=data)
+    response = requests.post(url, data=data, timeout=5)
     result = response.json()
     return result.get('success', False)
 
@@ -54,23 +54,6 @@ def is_username_taken(cursor, username):
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
     count = cursor.fetchone()[0]
     return count > 0
-
-# Отправка email
-def send_email(to_email, subject, message):
-    smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-    smtp_port = int(os.environ.get('SMTP_PORT', 587))
-    smtp_user = os.environ.get('SMTP_USER', 'your_email@gmail.com')
-    smtp_password = os.environ.get('SMTP_PASSWORD', 'your_password')
-
-    msg = MIMEText(message)
-    msg['Subject'] = subject
-    msg['From'] = smtp_user
-    msg['To'] = to_email
-
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
 
 # Декоратор для защиты маршрутов
 def login_required(f):
@@ -82,6 +65,10 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def is_telegram_username_taken(cursor, telegram_username):
+    cursor.execute('SELECT 1 FROM users WHERE telegram_username = %s', (telegram_username,))
+    return cursor.fetchone() is not None
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -90,17 +77,38 @@ def index():
 def registration_page():
     return render_template('registration.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
+# Функция для отправки сообщения через Telegram
+def send_telegram_message(telegram_username, message):
+    # Получаем токен бота
+    bot_token = '7532462167:AAFrEoclnACi8qzPTRvZedM7r06BMYE0ep8'
+    chat_id = telegram_username  # Используйте числовой chat_id вместо @username
+
+    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+    params = {
+        'chat_id': chat_id,
+        'text': message
+    }
+    response = requests.post(url, data=params)
+    return response.status_code == 200
+
+# Исправленный маршрут регистрации
 @app.route('/register', methods=['POST'])
 def register():
     data = request.form
     username = data.get('username')
-    email = data.get('email')
+    telegram_username = data.get('telegram_username')
     recaptcha_response = data.get('g-recaptcha-response')
 
+    # Проверка reCAPTCHA
     if not verify_recaptcha(recaptcha_response):
         flash('Пожалуйста, подтвердите, что вы не робот.', 'error')
         return redirect(url_for('registration_page'))
 
+    # Если имя пользователя не начинается с "@", добавляем его
+    if telegram_username and not telegram_username.startswith('@'):
+        telegram_username = '@' + telegram_username
+
+    # Генерация ключей и уникального ID
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
     confirmation_code = ''.join(random.choices(string.digits, k=6))
@@ -110,27 +118,34 @@ def register():
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # Проверка на занятость имени пользователя
         if is_username_taken(cur, username):
             flash('Имя пользователя уже занято.', 'username_taken')
-            return render_template('registration.html', username=username, email=email, recaptcha_site_key=RECAPTCHA_SITE_KEY)
+            return render_template('registration.html', username=username, telegram_username=telegram_username, recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, confirmation_code, confirmation_attempts, time, status) '
+        # Проверка на занятость Telegram username
+        if is_telegram_username_taken(cur, telegram_username):
+            flash('Этот Telegram username уже занят, пожалуйста, выберите другой.', 'telegram_taken')
+            return render_template('registration.html', username=username, telegram_username=telegram_username, recaptcha_site_key=RECAPTCHA_SITE_KEY)
+
+        # Вставка нового пользователя в базу данных
+        cur.execute('INSERT INTO users (id, username, telegram_username, public_key, private_key, confirmation_code, confirmation_attempts, time, status) '
                     'VALUES (%s, %s, %s, %s, %s, %s, %s, 0, FALSE)',
-                    (unique_id, username, email, public_key, private_key, confirmation_code, 3))
+                    (unique_id, username, telegram_username, public_key, private_key, confirmation_code, 3))
         conn.commit()
 
-        send_email(email, 'Код подтверждения GhostVPN', f'Ваш код подтверждения: {confirmation_code}')
-        flash('Регистрация успешна! Проверьте почту для подтверждения.', 'success')
+        # Отправка кода подтверждения через Telegram
+        send_telegram_message(telegram_username, f'Ваш код подтверждения: {confirmation_code}')
+        flash('Регистрация успешна! Проверьте Telegram для подтверждения.', 'success')
         return redirect(url_for('confirm_telegram'))
     except Exception as e:
         if conn:
             conn.rollback()
         flash(f'Ошибка при регистрации: {str(e)}', 'error')
-        return render_template('registration.html', username=username, email=email, recaptcha_site_key=RECAPTCHA_SITE_KEY)
+        return render_template('registration.html', username=username, telegram_username=telegram_username, recaptcha_site_key=RECAPTCHA_SITE_KEY)
     finally:
         if conn:
             conn.close()
-
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm_telegram():
     if request.method == 'POST':
@@ -169,6 +184,32 @@ def confirm_telegram():
 @login_required
 def new_user():
     return render_template('new_user.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        public_key = request.form['public_key']
+
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM users WHERE username = %s AND public_key = %s", (username, public_key))
+            user = cur.fetchone()
+
+            if user:
+                session['user_id'] = user[0]
+                return redirect(url_for('home'))
+            else:
+                flash("Неверное имя пользователя или публичный ключ!", "error")
+                return redirect(url_for('login'))
+        except Exception as e:
+            flash(f'Ошибка при входе: {str(e)}', "error")
+            return redirect(url_for('login'))
+        finally:
+            if conn:
+                conn.close()
+    return render_template('login.html')
 
 @app.route('/my-home-profile')
 @login_required
@@ -196,7 +237,6 @@ def my_home_profile():
             conn.close()
 
 @app.route('/tariff')
-@login_required
 def tariff():
     return render_template('tariff.html')
 
