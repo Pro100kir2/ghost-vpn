@@ -10,8 +10,6 @@ from datetime import timedelta
 from urllib.parse import urlparse
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
 
