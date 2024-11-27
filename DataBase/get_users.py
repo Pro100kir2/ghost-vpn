@@ -32,18 +32,32 @@ def get_registered_users():
         cur = conn.cursor()
 
         # SQL-запрос для получения списка пользователей
-        cur.execute("SELECT id,  username, email, public_key FROM users")
+        cur.execute("""
+            SELECT 
+                id, username, public_key, private_key, time, status, 
+                trial_used, confirmation_code, confirmation_attempts, 
+                is_confirmed, telegram_username, code_expiry 
+            FROM users
+        """)
 
         # Получаем все результаты запроса
         users = cur.fetchall()
 
         # Закрываем курсор
         cur.close()
-        if len(users) != 0:
+
+        if users:
             for user in users:
-                print(f"ID: {user[0]} , Username: {user[1]}, Email: {user[2]}, Public Key: {user[3]}")
+                print(f"""
+                ID: {user[0]}
+                Username: {user[1]}
+                Telegram Username: {user[10]}
+                Public Key: {user[2]}
+                Time: {user[4]}
+                Status: {user[5]}
+                """)
         else:
-            print("Таблица пуста, в ней нету пользователей")
+            print("Таблица пуста, в ней нет пользователей.")
 
     except Exception as e:
         print(f"Ошибка при получении пользователей: {str(e)}")
@@ -52,6 +66,7 @@ def get_registered_users():
         # Закрываем соединение с базой данных
         if conn:
             conn.close()
+
 
 # Запуск основной функции, если скрипт запускается как отдельная программа
 if __name__ == "__main__":
