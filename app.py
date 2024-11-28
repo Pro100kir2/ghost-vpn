@@ -248,10 +248,15 @@ def privacy_policy():
 
 @app.after_request
 def add_headers(response):
-    # Установка заголовков безопасности
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline';"
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' https://www.google.com https://www.gstatic.com; "
+        "frame-src https://www.google.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:;"
+    )
     return response
 
 @app.errorhandler(404)
