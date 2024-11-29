@@ -8,7 +8,6 @@ import requests
 from functools import wraps
 from datetime import timedelta
 from urllib.parse import urlparse
-import telebot
 
 
 app = Flask(__name__)
