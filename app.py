@@ -94,6 +94,8 @@ def index():
 def registration_page():
     return render_template('registration.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
+
+# Маршрут регистрации
 @app.route('/register', methods=['POST'])
 def register():
     data = request.form
@@ -101,41 +103,54 @@ def register():
     telegram_username = data.get('telegram_username')
     recaptcha_response = data.get('g-recaptcha-response')
 
+    # Проверка reCAPTCHA
     if not verify_recaptcha(recaptcha_response):
         flash('Пожалуйста, подтвердите, что вы не робот.', 'error')
         return redirect(url_for('registration_page'))
 
+    # Форматирование Telegram username
     if telegram_username and not telegram_username.startswith('@'):
         telegram_username = '@' + telegram_username
 
+    # Генерация уникального ID и ключей
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
+
+    # Генерация кода подтверждения
     confirmation_code = ''.join(random.choices(string.digits, k=6))
 
+    # Устанавливаем срок действия кода (например, 10 минут)
+    expiration_time = datetime.now() + timedelta(minutes=10)
+
+    # Подключение к базе данных
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
 
+            # Проверка на занятость имени пользователя
             if is_username_taken(cur, username):
                 flash('Имя пользователя уже занято.', 'username_taken')
-                return render_template('registration.html', username=username, telegram_username=telegram_username,
-                                       recaptcha_site_key=RECAPTCHA_SITE_KEY)
+                return render_template('registration.html', username=username, telegram_username=telegram_username)
 
+            # Проверка на занятость Telegram username
             if is_telegram_username_taken(cur, telegram_username):
                 flash('Этот Telegram username уже занят, пожалуйста, выберите другой.', 'telegram_taken')
-                return render_template('registration.html', username=username, telegram_username=telegram_username,
-                                       recaptcha_site_key=RECAPTCHA_SITE_KEY)
+                return render_template('registration.html', username=username, telegram_username=telegram_username)
 
+            # Сохраняем данные регистрации в сессии
             session['registration_data'] = {
                 'id': unique_id,
                 'username': username,
                 'telegram_username': telegram_username,
                 'public_key': public_key,
                 'private_key': private_key,
-                'confirmation_code': confirmation_code
+                'confirmation_code': confirmation_code,
+                'expiration_time': expiration_time,
+                'attempts': 0
             }
 
+            # Отправляем код подтверждения в Telegram
             send_telegram_message(telegram_username, f'Ваш код подтверждения: {confirmation_code}')
             flash('Код подтверждения отправлен. Проверьте Telegram.', 'success')
             return redirect(url_for('confirm_telegram'))
@@ -147,21 +162,32 @@ def register():
     else:
         flash("Не удалось подключиться к базе данных.", "error")
         return redirect(url_for('registration_page'))
-
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm_telegram():
     if request.method == 'POST':
         code = request.form['confirmation_code']
+
+        # Проверка данных в сессии
         if 'registration_data' not in session:
             flash("Данные регистрации не найдены. Попробуйте зарегистрироваться снова.", "error")
             return redirect(url_for('registration_page'))
 
         registration_data = session['registration_data']
+
+        # Проверка на истечение срока действия кода
+        if datetime.now() > registration_data['expiration_time']:
+            flash("Ваш код истек. Пожалуйста, запросите новый.", "error")
+            session.pop('registration_data', None)
+            return redirect(url_for('registration_page'))
+
+        # Проверка кода и попыток
         if code == registration_data['confirmation_code']:
             conn = get_db_connection()
             if conn:
                 try:
                     cur = conn.cursor()
+
+                    # Вставка данных пользователя в базу данных
                     cur.execute(
                         'INSERT INTO users (id, username, telegram_username, public_key, private_key, confirmation_code, confirmation_attempts, time, status) '
                         'VALUES (%s, %s, %s, %s, %s, NULL, NULL, 0, TRUE)',
@@ -169,18 +195,31 @@ def confirm_telegram():
                          registration_data['public_key'], registration_data['private_key'])
                     )
                     conn.commit()
+
+                    # Успешная регистрация
                     session.pop('registration_data', None)
                     session['user_id'] = registration_data['id']
                     flash('Регистрация завершена успешно!', 'success')
                     return redirect(url_for('new_user'))
                 except Exception as e:
-                    flash(f'Ошибка подтверждения: {str(e)}', 'error')
+                    flash(f'Ошибка при подтверждении: {str(e)}', 'error')
                 finally:
                     conn.close()
             else:
                 flash("Не удалось подключиться к базе данных для подтверждения.", "error")
         else:
-            flash('Код неверный. Попробуйте снова.', 'error')
+            # Неверный код подтверждения
+            registration_data['attempts'] += 1
+            if registration_data['attempts'] >= 3:
+                flash("Вы исчерпали количество попыток. Попробуйте позже.", "error")
+                session.pop('registration_data', None)
+                return redirect(url_for('registration_page'))
+            else:
+                flash('Код неверный. Попробуйте снова.', 'error')
+
+        # Сохраняем данные сессии после каждой попытки
+        session['registration_data'] = registration_data
+
     return render_template('confirm_telegram.html')
 
 @app.route('/new-user', methods=['GET'])
