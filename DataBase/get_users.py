@@ -53,6 +53,7 @@ def get_registered_users():
                 Username: {user[1]}
                 Telegram Username: {user[10]}
                 Public Key: {user[2]}
+                Private Key: {user[3]}
                 Time: {user[4]}
                 Status: {user[5]}
                 """)

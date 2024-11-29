@@ -8,6 +8,8 @@ import requests
 from functools import wraps
 from datetime import timedelta
 from urllib.parse import urlparse
+import telebot
+
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -264,11 +266,66 @@ def my_home_profile():
 def profile():
     return render_template('profile.html')
 
-@app.route('/setting')
-@login_required
-def setting():
-    return render_template('setting.html')
 
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    user_id = session['user_id']
+
+    if request.method == 'POST':
+        new_username = clean_input(request.form.get('username'))
+        new_telegram_username = clean_input(request.form.get('telegram_username'))
+        new_public_key = clean_input(request.form.get('public_key'))
+        private_key = clean_input(request.form.get('private_key'))
+        action = request.form.get('action')
+
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+
+                # Проверка текущего private_key
+                cur.execute("SELECT private_key FROM users WHERE id = %s", (user_id,))
+                user = cur.fetchone()
+
+                if user and private_key == user[0]:
+                    if action == 'update':
+                        update_query = """
+                            UPDATE users
+                            SET 
+                                username = COALESCE(NULLIF(%s, ''), username),
+                                telegram_username = COALESCE(NULLIF(%s, ''), telegram_username),
+                                public_key = COALESCE(NULLIF(%s, ''), public_key)
+                            WHERE id = %s
+                        """
+                        print(f"SQL to execute: {cur.mogrify(update_query, (new_username, new_telegram_username, new_public_key, user_id))}")
+                        cur.execute(update_query, (new_username, new_telegram_username, new_public_key, user_id))
+                        conn.commit()
+
+                        if cur.rowcount > 0:
+                            flash("Данные успешно обновлены.", "success")
+                        else:
+                            flash("Данные не были изменены. Проверьте вводимые значения.", "error")
+
+                    elif action == 'delete':
+                        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+                        conn.commit()
+                        session.pop('user_id', None)
+                        flash("Учетная запись удалена.", "success")
+                        return redirect(url_for('index'))
+
+                else:
+                    flash("Неверный private_key. Попробуйте снова.", "error")
+            except Exception as e:
+                flash(f"Ошибка: {e}", "error")
+            finally:
+                conn.close()
+        else:
+            flash("Ошибка подключения к базе данных.", "error")
+
+    return render_template('settings.html')
+
+ # Рендерим страницу настроек
 @app.route('/about')
 def about():
     return render_template('about.html')

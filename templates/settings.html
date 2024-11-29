@@ -69,6 +69,26 @@
       margin-top: 0;
     }
 
+    .settings-section input {
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .settings-section button {
+      background-color: #1db954;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
     .back-button {
       background-color: #1db954;
       color: #fff;
@@ -82,6 +102,14 @@
       left: 50%;
       transform: translateX(-50%);
     }
+
+    .settings-section button:hover {
+      background-color: #1b9b45;
+    }
+
+    .back-button:hover {
+      background-color: #1b9b45;
+    }
   </style>
 </head>
 <body>
@@ -91,15 +119,26 @@
     </header>
 
     <section class="settings-content">
-      <div class="settings-section">
-        <h2>Параметры учетной записи</h2>
-        <p>Изменение пароля, электронного адреса и других параметров учетной записи.</p>
-      </div>
+      <form method="POST" action="/settings">
+        <div class="settings-section">
+          <h2>Изменение учетной записи</h2>
 
-      <div class="settings-section">
-        <h2>Параметры безопасности</h2>
-        <p>Настройки конфиденциальности и безопасности.</p>
-      </div>
+          <label for="private_key">Введите ваш Private Key:</label>
+          <input type="text" id="private_key" name="private_key" required><br><br>
+
+          <label for="username">Новое имя пользователя:</label>
+          <input type="text" id="username" name="username" placeholder="Оставьте пустым, если не хотите изменять"><br><br>
+
+          <label for="telegram_username">Новое имя в Telegram:</label>
+          <input type="text" id="telegram_username" name="telegram_username" placeholder="Оставьте пустым, если не хотите изменять"><br><br>
+
+          <label for="public_key">Новый Public Key:</label>
+          <input type="text" id="public_key" name="public_key" placeholder="Оставьте пустым, если не хотите изменять"><br><br>
+
+          <button type="submit" name="action" value="update">Обновить данные</button>
+          <button type="submit" name="action" value="delete">Удалить учетную запись</button>
+        </div>
+      </form>
 
       <a href="/profile" class="back-button">Назад</a>
     </section>
