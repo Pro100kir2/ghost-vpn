@@ -14,10 +14,6 @@ app = Flask(__name__)
 
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True
-Session(app)
 
 # Генерация публичного и приватного ключей
 def generate_keys():
