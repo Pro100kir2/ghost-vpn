@@ -8,16 +8,16 @@ from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
 from flask_session import Session
-import requests
+import requests  # для работы с reCAPTCHA
 
 app = Flask(__name__)
 
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
-
-# reCAPTCHA ключи
-RECAPTCHA_SITE_KEY = "6LcHxYYqAAAAABYAG2B__k_6MIiLBY4yf5_cPym2"  # Публичный ключ
-RECAPTCHA_SECRET_KEY = "6LcHxYYqAAAAAFz_b7SB4p52ayqL1ubsg9hWyjgx"  # Секретный ключ
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+Session(app)
 
 # Генерация публичного и приватного ключей
 def generate_keys():
@@ -41,20 +41,6 @@ def get_db_connection():
         port=result.port
     )
 
-# Проверка reCAPTCHA
-def verify_recaptcha(response_token):
-    url = "https://www.google.com/recaptcha/api/siteverify"
-    data = {'secret': RECAPTCHA_SECRET_KEY, 'response': response_token}
-    response = requests.post(url, data=data)
-    result = response.json()
-    return result.get('success', False)
-
-# Проверка уникальности имени пользователя
-def is_username_taken(cursor, username):
-    cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
-    count = cursor.fetchone()[0]
-    return count > 0
-
 # Декоратор для защиты маршрутов
 def login_required(f):
     @wraps(f)
@@ -65,15 +51,15 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Маршрут для главной страницы
+# Главная страница
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
-# Маршрут для страницы регистрации
+# Страница регистрации
 @app.route('/registration', methods=['GET'])
 def registration_page():
-    return render_template('registration.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
+    return render_template('registration.html')
 
 # Обработка регистрации
 @app.route('/register', methods=['POST'])
@@ -81,12 +67,28 @@ def register():
     data = request.form
     username = data.get('username')
     email = data.get('email')
-    recaptcha_response = data.get('g-recaptcha-response')
+    recaptcha_response = data.get('g-recaptcha-response')  # Получение ответа капчи
 
-    # Проверяем reCAPTCHA
-    if not verify_recaptcha(recaptcha_response):
+    # Проверка reCAPTCHA
+    if not recaptcha_response:
         flash('Пожалуйста, подтвердите, что вы не робот.', 'error')
-        return redirect(url_for('registration_page'))
+        return render_template('registration.html', username=username, email=email)
+
+    recaptcha_secret = os.getenv('RECAPTCHA_SECRET_KEY', 'your-secret-key-here')
+    recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+
+    try:
+        response = requests.post(
+            recaptcha_verify_url,
+            data={'secret': recaptcha_secret, 'response': recaptcha_response}
+        )
+        result = response.json()
+        if not result.get('success'):
+            flash('Ошибка валидации reCAPTCHA. Попробуйте снова.', 'error')
+            return render_template('registration.html', username=username, email=email)
+    except Exception as e:
+        flash(f'Ошибка связи с сервером reCAPTCHA: {str(e)}', 'error')
+        return render_template('registration.html', username=username, email=email)
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
@@ -97,25 +99,33 @@ def register():
         cur = conn.cursor()
 
         if is_username_taken(cur, username):
-            flash('Имя пользователя уже занято, выберите другое.', 'username_taken')
-            return render_template('registration.html', username=username, email=email, recaptcha_site_key=RECAPTCHA_SITE_KEY)
+            flash('Пользователь с таким именем уже существует.', 'error')
+            return render_template('registration.html', username=username, email=email)
 
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time, trial_used) VALUES (%s, %s, %s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key, 0, False))
+        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time, status, trial_used) '
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+                    (unique_id, username, email, public_key, private_key, 30, 'inactive', False))  # Статус и пробный период
         conn.commit()
+        cur.close()
 
-        flash('Регистрация успешна! Проверьте почту для подтверждения.', 'success')
-        return redirect(url_for('login'))
+        flash('Поздравляем с успешной регистрацией!', 'success')
+        return render_template('new_user.html', message='Поздравляем с успешной регистрацией!', public_key=public_key, private_key=private_key)
+
     except Exception as e:
         if conn:
             conn.rollback()
-        flash(f'Ошибка при регистрации: {str(e)}', 'error')
-        return render_template('registration.html', username=username, email=email, recaptcha_site_key=RECAPTCHA_SITE_KEY)
+        flash(f'Ошибка при добавлении пользователя: {str(e)}', 'error')
+        return render_template('registration.html', username=username, email=email)
     finally:
         if conn:
             conn.close()
 
-# Маршрут для страницы входа
+# Проверка, занят ли пользователь
+def is_username_taken(cursor, username):
+    cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
+    return cursor.fetchone()[0] > 0
+
+# Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -131,6 +141,7 @@ def login():
 
             if user:
                 session['user_id'] = user[0]
+                session.permanent = True
                 return redirect(url_for('home'))
             else:
                 flash("Неверное имя пользователя или публичный ключ!", "error")
@@ -142,39 +153,85 @@ def login():
             if conn:
                 conn.close()
     return render_template('login.html')
-@app.route('/home', methods=['GET'])
-@login_required
-def home():
-    return render_template('home.html')
-@app.route('/profile')
-@login_required
-def profile():
-    return render_template('profile.html')
-@app.route('/tariff')
-@login_required
-def tariff():
-    return render_template('tariff.html')
-@app.route('/setting')
-@login_required
-def setting():
-    return render_template('setting.html')
-@app.route('/about')
-@login_required
-def about():
-    return render_template('about.html')
+
+# Маршрут для профиля
 @app.route('/my-home-profile')
 @login_required
 def my_home_profile():
     user_id = session['user_id']
+
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+        cur.execute("SELECT username, time, status, trial_used FROM users WHERE id = %s", (user_id,))
+        user = cur.fetchone()
+
+        if user:
+            username, time_left, status, trial_used = user
+            remaining_time = timedelta(days=time_left) if time_left > 0 else timedelta(days=0)
+            time_remaining = f"{remaining_time.days // 30} мес {remaining_time.days % 30} дн" if time_left > 0 else "Подписка завершена"
+            status = "Активен" if time_left > 0 else "Неактивен"
+
+            return render_template('my-home-profile.html', username=username, time_remaining=time_remaining, status=status, trial_used=trial_used)
+        else:
+            flash("Пользователь не найден.", "error")
+            return redirect(url_for('profile'))
+    except Exception as e:
+        flash(f'Ошибка при извлечении данных: {str(e)}', "error")
+        return redirect(url_for('profile'))
+    finally:
+        if conn:
+            conn.close()
+# Маршрут для выхода
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Вы успешно вышли из системы", "success")
+    return redirect(url_for('index'))
+
+# Маршруты с защитой
+@app.route('/home')
+@login_required
+def home():
+    return render_template('home.html')
+
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
+@app.route('/tariff')
+@login_required
+def tariff():
+    return render_template('tariff.html')
+
+@app.route('/setting')
+@login_required
+def setting():
+    return render_template('setting.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/my-home-profile')
+@login_required
+def my_home_profile():
+    user_id = session['user_id']
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
         # Получаем имя пользователя, время подписки (time) и статус
         cur.execute("SELECT username, time, status FROM users WHERE id = %s", (user_id,))
         user = cur.fetchone()
+
         if user:
             username, time_left, status = user
+
             # Проверяем, что time >= 0, чтобы отобразить оставшееся время
             if time_left >= 0:
                 # Рассчитываем оставшееся время как количество дней
@@ -186,16 +243,20 @@ def my_home_profile():
                 # Если time < 0, то подписка завершена
                 time_remaining = "Подписка завершена"
                 status = "Неактивен"
+
             return render_template('my-home-profile.html', username=username, time_remaining=time_remaining, status=status)
         else:
             flash("Пользователь не найден.", "error")
             return redirect(url_for('profile'))
+
     except Exception as e:
         flash(f'Ошибка при извлечении данных: {str(e)}', "error")
         return redirect(url_for('profile'))
+
     finally:
         if conn:
             conn.close()
+
 # Заголовки для предотвращения кэширования
 @app.after_request
 def add_no_cache_headers(response):

@@ -2,7 +2,6 @@ import os
 import psycopg2
 from urllib.parse import urlparse
 
-
 # Функция для подключения к базе данных
 def get_db_connection():
     # Получаем URL базы данных из переменной окружения
@@ -22,7 +21,6 @@ def get_db_connection():
         port=result.port
     )
 
-
 # Функция для получения и вывода списка зарегистрированных пользователей
 def get_registered_users():
     conn = None
@@ -34,9 +32,7 @@ def get_registered_users():
         # SQL-запрос для получения списка пользователей
         cur.execute("""
             SELECT 
-                id, username, public_key, private_key, time, status, 
-                trial_used, confirmation_code, confirmation_attempts, 
-                is_confirmed, telegram_username, code_expiry 
+                id, username, email, public_key, private_key, time, status, trial_used
             FROM users
         """)
 
@@ -51,11 +47,12 @@ def get_registered_users():
                 print(f"""
                 ID: {user[0]}
                 Username: {user[1]}
-                Telegram Username: {user[10]}
-                Public Key: {user[2]}
-                Private Key: {user[3]}
-                Time: {user[4]}
-                Status: {user[5]}
+                Email: {user[2]}
+                Public Key: {user[3]}
+                Private Key: {user[4]}
+                Time (days left): {user[5]}
+                Status: {user[6]}
+                Trial Used: {"Yes" if user[7] else "No"}
                 """)
         else:
             print("Таблица пуста, в ней нет пользователей.")
@@ -67,7 +64,6 @@ def get_registered_users():
         # Закрываем соединение с базой данных
         if conn:
             conn.close()
-
 
 # Запуск основной функции, если скрипт запускается как отдельная программа
 if __name__ == "__main__":
