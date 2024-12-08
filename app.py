@@ -15,6 +15,10 @@ app = Flask(__name__)
 # Настройки для Flask-сессии
 app.secret_key = os.urandom(24)
 
+# reCAPTCHA ключи
+RECAPTCHA_SITE_KEY = "6LcHxYYqAAAAABYAG2B__k_6MIiLBY4yf5_cPym2"  # Публичный ключ
+RECAPTCHA_SECRET_KEY = "6LcHxYYqAAAAAFz_b7SB4p52ayqL1ubsg9hWyjgx"  # Секретный ключ
+
 # Генерация публичного и приватного ключей
 def generate_keys():
     public_key = ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
@@ -36,6 +40,13 @@ def get_db_connection():
         host=result.hostname,
         port=result.port
     )
+# Проверка reCAPTCHA
+def verify_recaptcha(response_token):
+    url = "https://www.google.com/recaptcha/api/siteverify"
+    data = {'secret': RECAPTCHA_SECRET_KEY, 'response': response_token}
+    response = requests.post(url, data=data)
+    result = response.json()
+    return result.get('success', False)
 
 # Декоратор для защиты маршрутов
 def login_required(f):
@@ -68,9 +79,10 @@ def register():
     # Проверка reCAPTCHA
     if not recaptcha_response:
         flash('Пожалуйста, подтвердите, что вы не робот.', 'error')
-        return render_template('registration.html', username=username, email=email)
+        return render_template('registration.html', username=username, email=email,
+                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
-    recaptcha_secret = os.getenv('RECAPTCHA_SECRET_KEY', 'your-secret-key-here')
+    recaptcha_secret = os.getenv('RECAPTCHA_SECRET_KEY', '6LcHxYYqAAAAAFz_b7SB4p52ayqL1ubsg9hWyjgx')
     recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
 
     try:
@@ -81,10 +93,12 @@ def register():
         result = response.json()
         if not result.get('success'):
             flash('Ошибка валидации reCAPTCHA. Попробуйте снова.', 'error')
-            return render_template('registration.html', username=username, email=email)
+            return render_template('registration.html', username=username, email=email,
+                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
     except Exception as e:
         flash(f'Ошибка связи с сервером reCAPTCHA: {str(e)}', 'error')
-        return render_template('registration.html', username=username, email=email)
+        return render_template('registration.html',username=username, email=email,
+                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
@@ -96,7 +110,8 @@ def register():
 
         if is_username_taken(cur, username):
             flash('Пользователь с таким именем уже существует.', 'error')
-            return render_template('registration.html', username=username, email=email)
+            return render_template('registration.html', username=username, email=email,
+                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
         cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time, status, trial_used) '
                     'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
@@ -106,12 +121,12 @@ def register():
 
         flash('Поздравляем с успешной регистрацией!', 'success')
         return render_template('new_user.html', message='Поздравляем с успешной регистрацией!', public_key=public_key, private_key=private_key)
-
     except Exception as e:
         if conn:
             conn.rollback()
-        flash(f'Ошибка при добавлении пользователя: {str(e)}', 'error')
-        return render_template('registration.html', username=username, email=email)
+        flash(f'Ошибка при регистрации: {str(e)}', 'error')
+        return render_template('registration.html', username=username, email=email,
+                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
     finally:
         if conn:
             conn.close()
@@ -210,6 +225,10 @@ def setting():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+@app.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy-policy.html')
 # Заголовки для предотвращения кэширования
 @app.after_request
 def add_no_cache_headers(response):
@@ -217,6 +236,5 @@ def add_no_cache_headers(response):
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     return response
-
 if __name__ == '__main__':
     app.run(debug=True)
