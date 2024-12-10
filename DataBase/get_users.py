@@ -32,7 +32,7 @@ def get_registered_users():
         # SQL-запрос для получения списка пользователей
         cur.execute("""
             SELECT 
-                id, username, email, public_key, private_key, time, status, trial_used
+                id, username, telegram_name, public_key, private_key, time, status, trial_used
             FROM users
         """)
 
@@ -47,7 +47,7 @@ def get_registered_users():
                 print(f"""
                 ID: {user[0]}
                 Username: {user[1]}
-                Email: {user[2]}
+                telegram_name: {user[2]}
                 Public Key: {user[3]}
                 Private Key: {user[4]}
                 Time (days left): {user[5]}

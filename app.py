@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, session, flash
+from flask_session import Session
 import psycopg2
 import os
 import random
@@ -7,8 +8,9 @@ import uuid
 from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
-from flask_session import Session
-import requests  # для работы с reCAPTCHA
+import requests  # Для работы с reCAPTCHA
+from apscheduler.schedulers.background import BackgroundScheduler  # Планировщик задач
+
 
 app = Flask(__name__)
 
@@ -73,13 +75,13 @@ def registration_page():
 def register():
     data = request.form
     username = data.get('username')
-    email = data.get('email')
+    telegram_name = data.get('telegram_name')  # Получение Telegram имени
     recaptcha_response = data.get('g-recaptcha-response')  # Получение ответа капчи
 
     # Проверка reCAPTCHA
     if not recaptcha_response:
         flash('Пожалуйста, подтвердите, что вы не робот.', 'error')
-        return render_template('registration.html', username=username, email=email,
+        return render_template('registration.html', username=username, telegram_name=telegram_name,
                                recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
     recaptcha_secret = os.getenv('RECAPTCHA_SECRET_KEY', '6LcHxYYqAAAAAFz_b7SB4p52ayqL1ubsg9hWyjgx')
@@ -93,12 +95,16 @@ def register():
         result = response.json()
         if not result.get('success'):
             flash('Ошибка валидации reCAPTCHA. Попробуйте снова.', 'error')
-            return render_template('registration.html', username=username, email=email,
-                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
+            return render_template('registration.html', username=username, telegram_name=telegram_name,
+                                   recaptcha_site_key=RECAPTCHA_SITE_KEY)
     except Exception as e:
         flash(f'Ошибка связи с сервером reCAPTCHA: {str(e)}', 'error')
-        return render_template('registration.html',username=username, email=email,
+        return render_template('registration.html', username=username, telegram_name=telegram_name,
                                recaptcha_site_key=RECAPTCHA_SITE_KEY)
+
+    # Проверка и корректировка telegram_name
+    if not telegram_name.startswith('@'):
+        telegram_name = f"@{telegram_name}"  # Добавляем @ в начале имени
 
     public_key, private_key = generate_keys()
     unique_id = generate_unique_id()
@@ -110,12 +116,17 @@ def register():
 
         if is_username_taken(cur, username):
             flash('Пользователь с таким именем уже существует.', 'error')
-            return render_template('registration.html', username=username, email=email,
-                               recaptcha_site_key=RECAPTCHA_SITE_KEY)
+            return render_template('registration.html', username=username, telegram_name=telegram_name,
+                                   recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
-        cur.execute('INSERT INTO users (id, username, email, public_key, private_key, time, status, trial_used) '
+        if is_telegram_name_taken(cur, telegram_name):  # Дополнительная проверка уникальности
+            flash('Пользователь с таким Telegram-именем уже существует.', 'error')
+            return render_template('registration.html', username=username, telegram_name=telegram_name,
+                                   recaptcha_site_key=RECAPTCHA_SITE_KEY)
+
+        cur.execute('INSERT INTO users (id, username, telegram_name, public_key, private_key, time, status, trial_used) '
                     'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
-                    (unique_id, username, email, public_key, private_key, 30, 'inactive', False))  # Статус и пробный период
+                    (unique_id, username, telegram_name, public_key, private_key, 30, 'inactive', False))  # Статус и пробный период
         conn.commit()
         cur.close()
 
@@ -125,11 +136,16 @@ def register():
         if conn:
             conn.rollback()
         flash(f'Ошибка при регистрации: {str(e)}', 'error')
-        return render_template('registration.html', username=username, email=email,
+        return render_template('registration.html', username=username, telegram_name=telegram_name,
                                recaptcha_site_key=RECAPTCHA_SITE_KEY)
     finally:
         if conn:
             conn.close()
+
+# Функция проверки занятости Telegram имени
+def is_telegram_name_taken(cursor, telegram_name):
+    cursor.execute('SELECT COUNT(*) FROM users WHERE telegram_name = %s', (telegram_name,))
+    return cursor.fetchone()[0] > 0
 
 # Проверка, занят ли пользователь
 def is_username_taken(cursor, username):
@@ -194,7 +210,98 @@ def my_home_profile():
     finally:
         if conn:
             conn.close()
-# Маршрут для выхода
+
+# Функция добавления времени подписки
+def add_subscription_time(user_id, days_to_add):
+    """
+    Добавляет указанное количество дней подписки пользователю.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            UPDATE users
+            SET time = COALESCE(time, 0) + %s
+            WHERE id = %s
+        """, (days_to_add, user_id))
+
+        conn.commit()
+        cur.close()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# Функция уменьшения времени подписки
+def decrease_subscription_time():
+    """
+    Уменьшает количество дней подписки на 1 у всех пользователей с активной подпиской.
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Уменьшаем время подписки, но не допускаем отрицательных значений
+        cur.execute("""
+            UPDATE users
+            SET time = GREATEST(time - 1, 0)
+            WHERE time > 0
+        """)
+
+        conn.commit()
+        cur.close()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# Планировщик для уменьшения времени
+def schedule_tasks():
+    """
+    Запускает планировщик задач для уменьшения времени подписки.
+    """
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(decrease_subscription_time, 'interval', days=1)
+    scheduler.start()
+
+# Обработка webhook от платежной системы
+@app.route('/payment-webhook', methods=['POST'])
+def payment_webhook():
+    data = request.json  # Получаем данные от платежной системы
+
+    try:
+        user_id = data.get('user_id')  # Идентификатор пользователя
+        amount = data.get('amount')  # Сумма платежа
+        status = data.get('status')  # Статус платежа (успешный или нет)
+
+        # Логика определения продолжительности тарифа
+        if amount == 3:  # Предположим, 3 дня = 50 ₽
+            days_to_add = 3
+        elif amount == 350:  # Тариф на месяц = 200 ₽
+            days_to_add = 30
+        elif amount == 450:  # Тариф на месяц = 200 ₽
+            days_to_add = 30
+        elif amount == 750:  # Тариф на месяц = 200 ₽
+            days_to_add = 30
+        else:
+            days_to_add = 0  # Неизвестный тариф
+
+        # Если оплата успешна, начисляем дни
+        if status == 'success' and days_to_add > 0:
+            add_subscription_time(user_id, days_to_add)
+
+        return "OK", 200
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 @app.route('/logout')
 def logout():
     session.clear()
@@ -237,4 +344,5 @@ def add_no_cache_headers(response):
     response.headers['Expires'] = '0'
     return response
 if __name__ == '__main__':
+    schedule_tasks()  # Запуск планировщика
     app.run(debug=True)

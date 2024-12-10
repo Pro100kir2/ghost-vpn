@@ -142,6 +142,11 @@
       background-color: #17a148;
     }
 
+    /* Скрыть кнопку, если она была нажата */
+    .hidden {
+      display: none;
+    }
+
     /* Кнопка назад */
     .back-button {
       position: fixed;
@@ -199,20 +204,40 @@
           <li>Бесплатно</li>
           <li>5 ГБ для ВПН</li>
         </ul>
-        <a href="/pay/free-trial" class="pay-button">Попробовать бесплатно</a>
+        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+          <input type="hidden" name="receiver" value="4100118921201712">
+          <input type="hidden" name="formcomment" value="Оплата тарифа «Возьму на разок»">
+          <input type="hidden" name="short-dest" value="Тариф «Возьму на разок»">
+          <input type="hidden" name="label" value="single-month">
+          <input type="hidden" name="quickpay-form" value="donate">
+          <input type="hidden" name="targets" value="Тариф «Возьму на разок»">
+          <input type="hidden" name="sum" value="2" data-type="number">
+          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
+          <button type="submit" class="pay-button" id="freeButton">Попробовать бесплатно</button>
+        </form>
       </div>
 
       <!-- Тариф 2 -->
       <div class="tariff-card">
         <h2>Тариф «Возьму на разок»</h2>
-        <p class="price">Цена: 200₽ / мес</p>
+        <p class="price">Цена: 350₽ / мес</p>
         <p class="slogan">Тариф для тех, кто входит во вкус свободы</p>
         <ul class="features">
           <li>Самый низкий прайс</li>
           <li>15 ГБ для ВПН</li>
           <li>Конфиденциальность на уровне провайдеров</li>
         </ul>
-        <a href="/pay/single-month" class="pay-button">Оплатить</a>
+        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+          <input type="hidden" name="receiver" value="4100118921201712">
+          <input type="hidden" name="formcomment" value="Оплата тарифа «Возьму на разок»">
+          <input type="hidden" name="short-dest" value="Тариф «Возьму на разок»">
+          <input type="hidden" name="label" value="single-month">
+          <input type="hidden" name="quickpay-form" value="donate">
+          <input type="hidden" name="targets" value="Тариф «Возьму на разок»">
+          <input type="hidden" name="sum" value="350" data-type="number">
+          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
+          <button type="submit" class="pay-button">Оплатить</button>
+        </form>
       </div>
 
       <!-- Тариф 3 -->
@@ -226,7 +251,17 @@
           <li>Относительно невысокая цена</li>
           <li>Конфиденциальность на уровне государства</li>
         </ul>
-        <a href="/pay/more-vpn" class="pay-button">Оплатить</a>
+        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+          <input type="hidden" name="receiver" value="4100118921201712">
+          <input type="hidden" name="formcomment" value="Оплата тарифа «Ну, можно еще»">
+          <input type="hidden" name="short-dest" value="Тариф «Ну, можно еще»">
+          <input type="hidden" name="label" value="more-vpn">
+          <input type="hidden" name="quickpay-form" value="donate">
+          <input type="hidden" name="targets" value="Тариф «Ну, можно еще»">
+          <input type="hidden" name="sum" value="450" data-type="number">
+          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
+          <button type="submit" class="pay-button">Оплатить</button>
+        </form>
       </div>
 
       <!-- Тариф 4 -->
@@ -239,12 +274,28 @@
           <li>Неограниченный объем данных</li>
           <li>Наивысший уровень конфиденциальности</li>
         </ul>
-        <a href="/pay/usual" class="pay-button">Оплатить</a>
+        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+          <input type="hidden" name="receiver" value="4100118921201712">
+          <input type="hidden" name="formcomment" value="Оплата тарифа «Мне как обычно»">
+          <input type="hidden" name="short-dest" value="Тариф «Мне как обычно»">
+          <input type="hidden" name="label" value="usual">
+          <input type="hidden" name="quickpay-form" value="donate">
+          <input type="hidden" name="targets" value="Тариф «Мне как обычно»">
+          <input type="hidden" name="sum" value="750" data-type="number">
+          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
+          <button type="submit" class="pay-button">Оплатить</button>
+        </form>
       </div>
     </section>
   </section>
 
-  <!-- Кнопка назад -->
   <a href="/profile" class="back-button">Назад</a>
+
+  <script>
+    // Обработчик на кнопку "Попробовать бесплатно"
+    document.getElementById('freeButton').addEventListener('click', function() {
+      this.classList.add('hidden');
+    });
+  </script>
 </body>
 </html>
