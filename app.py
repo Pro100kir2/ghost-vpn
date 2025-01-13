@@ -9,9 +9,6 @@ from urllib.parse import urlparse
 from functools import wraps
 from datetime import datetime, timedelta
 import requests  # Для работы с reCAPTCHA
-from apscheduler.schedulers.background import BackgroundScheduler  # Планировщик задач
-
-
 app = Flask(__name__)
 
 # Настройки для Flask-сессии
@@ -34,6 +31,8 @@ def generate_unique_id():
 # Соединение с базой данных
 def get_db_connection():
     db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        raise ValueError("DATABASE_URL не задана в переменных окружения.")
     result = urlparse(db_url)
     return psycopg2.connect(
         dbname=result.path[1:],
@@ -196,9 +195,19 @@ def my_home_profile():
 
         if user:
             username, time_left, status, trial_used = user
-            remaining_time = timedelta(days=time_left) if time_left > 0 else timedelta(days=0)
-            time_remaining = f"{remaining_time.days // 30} мес {remaining_time.days % 30} дн" if time_left > 0 else "Подписка завершена"
-            status = "Активен" if time_left > 0 else "Неактивен"
+
+            if time_left > 0:
+                # Преобразование времени в нужный формат
+                remaining_time = timedelta(seconds=time_left)
+                months = remaining_time.days // 30
+                days = remaining_time.days % 30
+                hours, remainder = divmod(remaining_time.seconds, 3600)
+                minutes, _ = divmod(remainder, 60)
+                time_remaining = f"{months} мес {days} дн {hours:02}:{minutes:02}"
+                status = "Активен"
+            else:
+                time_remaining = "Подписка завершена"
+                status = "Неактивен"
 
             return render_template('my-home-profile.html', username=username, time_remaining=time_remaining, status=status, trial_used=trial_used)
         else:
@@ -211,97 +220,6 @@ def my_home_profile():
         if conn:
             conn.close()
 
-# Функция добавления времени подписки
-def add_subscription_time(user_id, days_to_add):
-    """
-    Добавляет указанное количество дней подписки пользователю.
-    """
-    conn = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        cur.execute("""
-            UPDATE users
-            SET time = COALESCE(time, 0) + %s
-            WHERE id = %s
-        """, (days_to_add, user_id))
-
-        conn.commit()
-        cur.close()
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        raise e
-    finally:
-        if conn:
-            conn.close()
-
-# Функция уменьшения времени подписки
-def decrease_subscription_time():
-    """
-    Уменьшает количество дней подписки на 1 у всех пользователей с активной подпиской.
-    """
-    conn = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Уменьшаем время подписки, но не допускаем отрицательных значений
-        cur.execute("""
-            UPDATE users
-            SET time = GREATEST(time - 1, 0)
-            WHERE time > 0
-        """)
-
-        conn.commit()
-        cur.close()
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        raise e
-    finally:
-        if conn:
-            conn.close()
-
-# Планировщик для уменьшения времени
-def schedule_tasks():
-    """
-    Запускает планировщик задач для уменьшения времени подписки.
-    """
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(decrease_subscription_time, 'interval', days=1)
-    scheduler.start()
-
-# Обработка webhook от платежной системы
-@app.route('/payment-webhook', methods=['POST'])
-def payment_webhook():
-    data = request.json  # Получаем данные от платежной системы
-
-    try:
-        user_id = data.get('user_id')  # Идентификатор пользователя
-        amount = data.get('amount')  # Сумма платежа
-        status = data.get('status')  # Статус платежа (успешный или нет)
-
-        # Логика определения продолжительности тарифа
-        if amount == 3:  # Предположим, 3 дня = 50 ₽
-            days_to_add = 3
-        elif amount == 350:  # Тариф на месяц = 200 ₽
-            days_to_add = 30
-        elif amount == 450:  # Тариф на месяц = 200 ₽
-            days_to_add = 30
-        elif amount == 750:  # Тариф на месяц = 200 ₽
-            days_to_add = 30
-        else:
-            days_to_add = 0  # Неизвестный тариф
-
-        # Если оплата успешна, начисляем дни
-        if status == 'success' and days_to_add > 0:
-            add_subscription_time(user_id, days_to_add)
-
-        return "OK", 200
-    except Exception as e:
-        return f"Error: {str(e)}", 500
 @app.route('/logout')
 def logout():
     session.clear()
@@ -324,10 +242,71 @@ def profile():
 def tariff():
     return render_template('tariff.html')
 
-@app.route('/setting')
+
+@app.route('/settings', methods=['GET', 'POST'])
 @login_required
-def setting():
-    return render_template('setting.html')
+def settings():
+    if request.method == 'POST':
+        username = request.form['username']
+        private_key = request.form['private_key']
+
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM users WHERE username = %s AND private_key = %s", (username, private_key))
+            user = cur.fetchone()
+            if user:
+                session['user_id'] = user[0]
+                session.permanent = True
+                return redirect(url_for('update_settings'))
+        except Exception as e:
+            flash(f'Ошибка при проверке данных: {str(e)}', "error")
+            return render_template('settings.html')
+        finally:
+            if conn:
+                conn.close()
+
+    return render_template('settings.html')
+@app.route('/update_settings', methods=['GET', 'POST'])
+@login_required
+def update_settings():
+    if request.method == 'POST':
+        username = session['username']  # Получаем имя пользователя из сессии
+        new_username = request.form.get('username')  # Получаем новое имя пользователя
+        new_telegram_name = request.form.get('telegram_name')  # Получаем новое имя в Telegram
+        new_public_key = request.form.get('public_key')  # Получаем новый публичный ключ
+        conn = None
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # Если новое имя пользователя не пустое и отличается от текущего, обновляем его
+            if new_username and new_username != username:
+                cur.execute("UPDATE users SET username = %s WHERE username = %s", (new_username, username))
+                username = new_username  # Обновляем имя пользователя в сессии
+
+            # Если новое имя в Telegram не пустое, обновляем его
+            if new_telegram_name:
+                cur.execute("UPDATE users SET telegram_name = %s WHERE username = %s", (new_telegram_name, username))
+
+            # Если новый публичный ключ не пустой, обновляем его
+            if new_public_key:
+                cur.execute("UPDATE users SET public_key = %s WHERE username = %s", (new_public_key, username))
+            # Сохраняем изменения в базе данных
+            conn.commit()
+
+            flash("Настройки обновлены успешно!", "success")
+            return redirect(url_for('profile'))  # Перенаправляем на страницу профиля
+
+        except Exception as e:
+            flash(f'Ошибка при обновлении настроек: {str(e)}', "error")
+            return render_template('update_settings.html')  # Возвращаем на страницу обновления настроек при ошибке
+        finally:
+            if conn:
+                conn.close()
+
+    return render_template('update_settings.html')  # Отображаем форму для обновления настроек
 
 @app.route('/about')
 def about():
@@ -344,5 +323,4 @@ def add_no_cache_headers(response):
     response.headers['Expires'] = '0'
     return response
 if __name__ == '__main__':
-    schedule_tasks()  # Запуск планировщика
     app.run(debug=True)

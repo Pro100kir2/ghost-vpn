@@ -5,46 +5,26 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime, timedelta
-import logging
-
-# Словарь для хранения кодов и времени их действия
-user_codes = {}
 
 # Токен вашего бота
 BOT_TOKEN = '7532462167:AAFrEoclnACi8qzPTRvZedM7r06BMYE0ep8'
 SUPPORT_CHAT_ID = '-4657717234'  # Замените на ID вашего чата для техподдержки
 
-# Инициализация логирования
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Хранение кода подтверждения и ограничений
+user_codes = {}  # Словарь для хранения данных пользователей (username, code, timestamp, attempts)
 
-# Генерация шестизначного случайного кода
+# Генерация шестизначного кода
 def generate_confirmation_code():
-    return random.randint(100000, 999999)
+    return ''.join(random.choices('0123456789', k=6))
 
-# Отправка сообщения пользователю через Telegram API
-async def send_code_to_user(username, code):
-    try:
-        # Отправляем код пользователю
-        await bot.send_message(chat_id=username, text=f"Ваш код подтверждения: {code}")
-        return True
-    except Exception as e:
-        print(f"Ошибка отправки кода: {e}")
-        return False
-
-# Команда start: приветствие пользователя
+# Обработчик команды /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        'Привет! Пожалуйста, введите свой Telegram username для получения кода подтверждения.')
+    # Запрос на ввод Telegram username
+    await update.message.reply_text("Введите ваш Telegram username, чтобы получить код подтверждения:")
 
-# Обработка ввода username
+# Обработчик ввода username
 async def handle_username(update: Update, context: ContextTypes.DEFAULT_TYPE):
     username = update.message.text.strip()
-
-    # Убедитесь, что username начинается с @, если нет, добавляем его
-    if not username.startswith('@'):
-        username = '@' + username
 
     # Генерация шестизначного кода и установка таймера (10 минут)
     code = generate_confirmation_code()
@@ -58,57 +38,88 @@ async def handle_username(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'attempts': 0
     }
 
-    # Отправляем код на Telegram username
+    # Отправляем код пользователю
     await update.message.reply_text(f"Ваш код подтверждения: {code}. Этот код действителен в течение 10 минут.")
 
-    # Отправка кода пользователю через Telegram API
-    await send_telegram_message(context, username, f"Ваш код подтверждения: {code}. Этот код действителен в течение 10 минут.")
-
-# Обработка ввода кода подтверждения
+# Обработчик ввода кода
 async def handle_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
+    entered_code = update.message.text.strip()
+
+    # Проверка, есть ли код для этого пользователя
     if user_id not in user_codes:
-        await update.message.reply_text(
-            "Вы не запросили код подтверждения. Пожалуйста, введите свой username для его получения.")
+        await update.message.reply_text("Вы не запросили код подтверждения. Пожалуйста, начните с команды /start.")
         return
 
-    # Получаем введенный код
-    user_input_code = update.message.text.strip()
+    user_data = user_codes[user_id]
 
-    # Проверка на истечение времени действия
-    code_info = user_codes[user_id]
-    if datetime.now() > code_info['expiration']:
+    # Проверка на истечение времени действия кода
+    if datetime.now() > user_data['expiration']:
         del user_codes[user_id]
-        await update.message.reply_text("Ваш код истек. Пожалуйста, запросите новый.")
+        await update.message.reply_text("Ваш код подтверждения истек. Пожалуйста, введите username заново.")
         return
 
     # Проверка на количество попыток
-    if code_info['attempts'] >= 3:
-        await update.message.reply_text("Вы исчерпали количество попыток. Пожалуйста, запросите новый код.")
+    if user_data['attempts'] >= 3:
+        del user_codes[user_id]
+        await update.message.reply_text("Вы превысили количество попыток ввода. Пожалуйста, запросите новый код.")
         return
 
-    # Проверка кода
-    if int(user_input_code) == code_info['code']:
-        await update.message.reply_text("Код подтверждения верен! Вы успешно прошли проверку.")
-        del user_codes[user_id]  # Удалить информацию о коде после успешной проверки
+    # Проверка на правильность введенного кода
+    if entered_code == user_data['code']:
+        del user_codes[user_id]  # Удаляем код после успешного ввода
+        await update.message.reply_text("Код подтверждения правильный! Вы успешно прошли проверку.")
     else:
-        # Увеличиваем количество попыток
-        code_info['attempts'] += 1
-        await update.message.reply_text(f"Неверный код! Попыток осталось: {3 - code_info['attempts']}")
+        user_data['attempts'] += 1
+        attempts_left = 3 - user_data['attempts']
+        await update.message.reply_text(f"Неправильный код. Осталось попыток: {attempts_left}.")
 
-# Главная функция для запуска бота
+# Обработчик сообщений от пользователя для техподдержки
+async def handle_support_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+    username = update.message.from_user.username or "Не указан"
+    message = update.message.text
+
+    # Пересылаем сообщение в чат техподдержки
+    support_message = f"Username: {username}\nMessage: {message}"
+    await context.bot.send_message(chat_id=SUPPORT_CHAT_ID, text=support_message)
+
+    # Ответ пользователю
+    await update.message.reply_text("Благодарим за ваше сообщение. Наша команда техподдержки немедленно займется вашей проблемой.")
+
+# Основной обработчик кнопок
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == 'support':
+        await support(update, context)
+    elif query.data == 'vpn_config':
+        await query.edit_message_text(text="Функция получения VPN конфигурации будет доступна позже.")
+    elif query.data == 'back_to_main_menu':
+        await start(update, context)
+
+# Обработчик команды поддержки
+async def support(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("Назад", callback_data='back_to_main_menu')]  # Кнопка назад
+    ]
+    await update.callback_query.message.reply_text("Доброго времени суток! Чем именно мы можем вам помочь?", reply_markup=InlineKeyboardMarkup(keyboard))
+
+# Основная функция запуска бота
 def main():
-    # Укажите ваш токен бота
-    bot_token = BOT_TOKEN
-    application = Application.builder().token(bot_token).build()
+    # Используем новый Application вместо Updater
+    application = Application.builder().token(BOT_TOKEN).build()
 
-    # Команды и обработчики
+    # Обработчики команд и сообщений
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_username))
-    application.add_handler(MessageHandler(filters.TEXT, handle_code))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_username))  # Обработчик для ввода username
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_code))  # Обработчик для ввода кода
+    application.add_handler(CallbackQueryHandler(button))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support_message))  # Обработчик поддержки
 
     # Запуск бота
     application.run_polling()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,301 +1,246 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Тарифы</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Plans</title>
+    <link rel="icon" href="/static/images/Group_46.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/static/images/Group_46.png" sizes="16x16" type="image/png">
 
-  <link rel="icon" href="/static/images/favicon1.png" type="image/png">
-  <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="/static/images/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/static/images/Group_46.png" sizes="180x180">
+    <link rel="icon" href="/static/images/Group_46.png" sizes="192x192" type="image/png">
+    <link rel="icon" href="/static/images/Group_46.png" sizes="512x512" type="image/png">
 
-  <!-- Большие иконки для Android и iOS -->
-  <link rel="apple-touch-icon" href="/static/images/apple-touch-icon-180x180.png" sizes="180x180">
-  <link rel="icon" href="/static/images/icon-192x192.png" sizes="192x192" type="image/png">
-  <link rel="icon" href="/static/images/icon-512x512.png" sizes="512x512" type="image/png">
+    <!-- Иконка для Windows (neuro-icon.ico) -->
+    <link rel="shortcut icon" href="/static/images/Group_46.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: black;
+            margin: 0;
+            padding: 0;
+        }
 
-  <!-- Иконка для Windows (favicon.ico) -->
-  <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
-  <style>
-    /* Общие стили */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+        .header {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-    /* Hero секция */
-    .hero {
-      background: url('../static/images/home-fon.png') no-repeat center center / cover;
-      color: #fff;
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      position: relative;
-      margin: 0;
-    }
+        .header h1 {
+            font-size: 36px;
+            margin: 0;
+        }
 
-    /* Заголовок */
-    .header {
-      width: 100%;
-      padding: 10px;
-      text-align: center;
-      color: #fff;
-      font-size: 2rem;
-      position: absolute;
-      top: 20px;
-      left: 0;
-    }
+        .header .nav-links {
+            margin-top: 10px;
+        }
 
-    /* Стили для тарифов */
-    .tariffs {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      padding: 40px 20px;
-      width: 100%;
-      max-width: 1200px;
-      box-sizing: border-box;
-      margin-top: 200px;
-      margin-bottom: 100px;
-    }
+        .header .nav-links a {
+            color: #ff69b4;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
 
-    .tariff-card {
-      background-color: #2a2a2a;
-      color: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      flex: 1 1 calc(22% - 15px);
-      max-width: 280px;
-      box-sizing: border-box;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      transition: all 0.3s ease;
-    }
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
 
-    .tariff-card h2 {
-      margin-top: 0;
-      font-size: 1.3em;
-    }
+        .pricing-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
 
-    .price {
-      font-size: 1.4em;
-      color: #1db954;
-      margin: 8px 0;
-    }
+        .pricing-card:hover {
+            transform: scale(1.05);
+        }
 
-    .slogan {
-      font-style: italic;
-      color: #007bff;
-      margin-bottom: 12px;
-    }
+        .pricing-card h3 {
+            font-size: 24px;
+            color: #2575fc;
+        }
 
-    .features {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      text-align: left;
-      font-weight: bold;
-    }
+        .pricing-card p {
+            font-size: 18px;
+        }
 
-    .features li {
-      margin: 4px 0;
-      font-size: 0.85em;
-    }
+        .pricing-card button {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
 
-    .features li::before {
-      content: "+ ";
-      color: #1db954;
-      font-weight: bold;
-    }
+        .pricing-card button:hover {
+            background-color: #1e66cc;
+        }
 
-    .pay-button {
-      background-color: #1db954;
-      color: #fff;
-      padding: 8px 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.95em;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-      margin-top: auto;
-    }
+        .pricing-card form {
+            margin-top: 20px;
+        }
 
-    .pay-button:hover {
-      background-color: #17a148;
-    }
+        @media (max-width: 768px) {
+            .pricing-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
 
-    /* Скрыть кнопку, если она была нажата */
-    .hidden {
-      display: none;
-    }
-
-    /* Кнопка назад */
-    .back-button {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #1db954;
-      color: #fff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-
-    .back-button:hover {
-      background-color: #17a148;
-    }
-
-    /* Адаптивные стили */
-    @media (max-width: 1200px) {
-      .tariff-card {
-        flex: 1 1 calc(33.33% - 15px); /* Три карточки в ряду */
-      }
-    }
-
-    @media (max-width: 800px) {
-      .tariff-card {
-        flex: 1 1 calc(50% - 15px); /* Две карточки в ряду */
-      }
-    }
-
-    @media (max-width: 500px) {
-      .tariff-card {
-        flex: 1 1 100%; /* Одна карточка в ряду */
-      }
-    }
-  </style>
+        @media (max-width: 480px) {
+            .pricing-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <section class="hero">
-    <header class="header">
-      <h1>Тарифы</h1>
-    </header>
+    <div class="header">
+        <h1>Choose Your Plan</h1>
+        <div class="nav-links">
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+        </div>
+    </div>
 
-    <section class="tariffs">
-      <!-- Тариф 1 -->
-      <div class="tariff-card">
-        <h2>Тариф «Пробный ВПН на 3 дня»</h2>
-        <p class="price">Цена: Бесплатно</p>
-        <p class="slogan">Через эти 3 дня ваша жизнь разделится на до и после</p>
-        <ul class="features">
-          <li>Бесплатно</li>
-          <li>5 ГБ для ВПН</li>
-        </ul>
-        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
-          <input type="hidden" name="receiver" value="4100118921201712">
-          <input type="hidden" name="formcomment" value="Оплата тарифа «Возьму на разок»">
-          <input type="hidden" name="short-dest" value="Тариф «Возьму на разок»">
-          <input type="hidden" name="label" value="single-month">
-          <input type="hidden" name="quickpay-form" value="donate">
-          <input type="hidden" name="targets" value="Тариф «Возьму на разок»">
-          <input type="hidden" name="sum" value="2" data-type="number">
-          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
-          <button type="submit" class="pay-button" id="freeButton">Попробовать бесплатно</button>
-        </form>
-      </div>
+    <div class="pricing-cards">
+        <!-- Free Plan -->
+        <div class="pricing-card">
+            <h3>Free Plan</h3>
+            <p>10 requests per day</p>
+            <p>Access to 1 neural network</p>
+            <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+                <input type="hidden" name="tariff_id" value="free">
+                <input type="hidden" name="receiver" value="4100118921201712">
+                <input type="hidden" name="formcomment" value="Оплата тарифа Free Plan">
+                <input type="hidden" name="short-dest" value="Free Plan">
+                <input type="hidden" name="label" value="free-plan">
+                <input type="hidden" name="quickpay-form" value="donate">
+                <input type="hidden" name="targets" value="Free Plan">
+                <input type="hidden" name="sum" value="0" data-type="number">
+                <input type="hidden" name="successURL" value="https://your-site.com/tariff">
+                <button type="submit">Try for Free</button>
+            </form>
+        </div>
 
-      <!-- Тариф 2 -->
-      <div class="tariff-card">
-        <h2>Тариф «Возьму на разок»</h2>
-        <p class="price">Цена: 350₽ / мес</p>
-        <p class="slogan">Тариф для тех, кто входит во вкус свободы</p>
-        <ul class="features">
-          <li>Самый низкий прайс</li>
-          <li>15 ГБ для ВПН</li>
-          <li>Конфиденциальность на уровне провайдеров</li>
-        </ul>
-        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
-          <input type="hidden" name="receiver" value="4100118921201712">
-          <input type="hidden" name="formcomment" value="Оплата тарифа «Возьму на разок»">
-          <input type="hidden" name="short-dest" value="Тариф «Возьму на разок»">
-          <input type="hidden" name="label" value="single-month">
-          <input type="hidden" name="quickpay-form" value="donate">
-          <input type="hidden" name="targets" value="Тариф «Возьму на разок»">
-          <input type="hidden" name="sum" value="350" data-type="number">
-          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
-          <button type="submit" class="pay-button">Оплатить</button>
-        </form>
-      </div>
+        <!-- Basic Plan -->
+        <div class="pricing-card">
+            <h3>Basic Plan</h3>
+            <p>100 requests per month</p>
+            <p>Access to all neural networks</p>
+            <p>Cost: 199 RUB/month</p>
+            <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+                <input type="hidden" name="tariff_id" value="basic">
+                <input type="hidden" name="receiver" value="4100118921201712">
+                <input type="hidden" name="formcomment" value="Оплата тарифа Basic Plan">
+                <input type="hidden" name="short-dest" value="Basic Plan">
+                <input type="hidden" name="label" value="basic-plan">
+                <input type="hidden" name="quickpay-form" value="donate">
+                <input type="hidden" name="targets" value="Basic Plan">
+                <input type="hidden" name="sum" value="199" data-type="number">
+                <input type="hidden" name="successURL" value="https://your-site.com/tariff">
+                <button type="submit">Pay</button>
+            </form>
+        </div>
 
-      <!-- Тариф 3 -->
-      <div class="tariff-card">
-        <h2>Тариф «Ну, можно еще»</h2>
-        <p class="price">Цена: 450₽ / мес</p>
-        <p class="slogan">Свобода сладка, не так ли?</p>
-        <ul class="features">
-          <li>Всё, что у тарифа «На разок»</li>
-          <li>Доп. 25 ГБ</li>
-          <li>Относительно невысокая цена</li>
-          <li>Конфиденциальность на уровне государства</li>
-        </ul>
-        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
-          <input type="hidden" name="receiver" value="4100118921201712">
-          <input type="hidden" name="formcomment" value="Оплата тарифа «Ну, можно еще»">
-          <input type="hidden" name="short-dest" value="Тариф «Ну, можно еще»">
-          <input type="hidden" name="label" value="more-vpn">
-          <input type="hidden" name="quickpay-form" value="donate">
-          <input type="hidden" name="targets" value="Тариф «Ну, можно еще»">
-          <input type="hidden" name="sum" value="450" data-type="number">
-          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
-          <button type="submit" class="pay-button">Оплатить</button>
-        </form>
-      </div>
+        <!-- Standard Plan -->
+        <div class="pricing-card">
+            <h3>Standard Plan</h3>
+            <p>500 requests per month</p>
+            <p>Access to all neural networks</p>
+            <p>Cost: 499 RUB/month</p>
+            <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+                <input type="hidden" name="tariff_id" value="standard">
+                <input type="hidden" name="receiver" value="4100118921201712">
+                <input type="hidden" name="formcomment" value="Оплата тарифа Standard Plan">
+                <input type="hidden" name="short-dest" value="Standard Plan">
+                <input type="hidden" name="label" value="standard-plan">
+                <input type="hidden" name="quickpay-form" value="donate">
+                <input type="hidden" name="targets" value="Standard Plan">
+                <input type="hidden" name="sum" value="499" data-type="number">
+                <input type="hidden" name="successURL" value="https://your-site.com/tariff">
+                <button type="submit">Pay</button>
+            </form>
+        </div>
 
-      <!-- Тариф 4 -->
-      <div class="tariff-card">
-        <h2>Тариф «Мне как обычно»</h2>
-        <p class="price">Цена: 750₽ / мес</p>
-        <p class="slogan">Вы уже гуру и точно знаете, что вам нужно</p>
-        <ul class="features">
-          <li>Всё, что у тарифа «Ну, можно еще»</li>
-          <li>Неограниченный объем данных</li>
-          <li>Наивысший уровень конфиденциальности</li>
-        </ul>
-        <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
-          <input type="hidden" name="receiver" value="4100118921201712">
-          <input type="hidden" name="formcomment" value="Оплата тарифа «Мне как обычно»">
-          <input type="hidden" name="short-dest" value="Тариф «Мне как обычно»">
-          <input type="hidden" name="label" value="usual">
-          <input type="hidden" name="quickpay-form" value="donate">
-          <input type="hidden" name="targets" value="Тариф «Мне как обычно»">
-          <input type="hidden" name="sum" value="750" data-type="number">
-          <input type="hidden" name="successURL" value="https://ghost-vpn.vercel.app/tariff">
-          <button type="submit" class="pay-button">Оплатить</button>
-        </form>
-      </div>
-    </section>
-  </section>
+        <!-- Premium Plan -->
+        <div class="pricing-card">
+            <h3>Premium Plan</h3>
+            <p>1000 requests per month</p>
+            <p>Access to all neural networks with priority processing</p>
+            <p>Cost: 899 RUB/month</p>
+            <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+                <input type="hidden" name="tariff_id" value="premium">
+                <input type="hidden" name="receiver" value="4100118921201712">
+                <input type="hidden" name="formcomment" value="Оплата тарифа Premium Plan">
+                <input type="hidden" name="short-dest" value="Premium Plan">
+                <input type="hidden" name="label" value="premium-plan">
+                <input type="hidden" name="quickpay-form" value="donate">
+                <input type="hidden" name="targets" value="Premium Plan">
+                <input type="hidden" name="sum" value="899" data-type="number">
+                <input type="hidden" name="successURL" value="https://your-site.com/tariff">
+                <button type="submit">Pay</button>
+            </form>
+        </div>
 
-  <a href="/profile" class="back-button">Назад</a>
+        <!-- Pro Plan -->
+        <div class="pricing-card">
+            <h3>Pro Plan</h3>
+            <p>3000 requests per month</p>
+            <p>Access to all neural networks with priority processing</p>
+            <p>Support for up to 5 users</p>
+            <p>Cost: 2499 RUB/month</p>
+            <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+                <input type="hidden" name="tariff_id" value="pro">
+                <input type="hidden" name="receiver" value="4100118921201712">
+                <input type="hidden" name="formcomment" value="Оплата тарифа Pro Plan">
+                <input type="hidden" name="short-dest" value="Pro Plan">
+                <input type="hidden" name="label" value="pro-plan">
+                <input type="hidden" name="quickpay-form" value="donate">
+                <input type="hidden" name="targets" value="Pro Plan">
+                <input type="hidden" name="sum" value="2499" data-type="number">
+                <input type="hidden" name="successURL" value="https://your-site.com/tariff">
+                <button type="submit">Pay</button>
+            </form>
+        </div>
 
-  <script>
-    // Обработчик на кнопку "Попробовать бесплатно"
-    document.getElementById('freeButton').addEventListener('click', function() {
-      this.classList.add('hidden');
-    });
-  </script>
+        <!-- Developer Plan -->
+        <div class="pricing-card">
+            <h3>Developer Plan</h3>
+            <p>8000 requests per month</p>
+            <p>Access to all neural networks with priority processing</p>
+            <p>Support for up to 10 users</p>
+            <p>Cost: 6500 RUB/month</p>
+            <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
+                <input type="hidden" name="tariff_id" value="developer">
+                <input type="hidden" name="receiver" value="4100118921201712">
+                <input type="hidden" name="formcomment" value="Оплата тарифа Developer Plan">
+                <input type="hidden" name="short-dest" value="Developer Plan">
+                <input type="hidden" name="label" value="developer-plan">
+                <input type="hidden" name="quickpay-form" value="donate">
+                <input type="hidden" name="targets" value="Developer Plan">
+                <input type="hidden" name="sum" value="6500" data-type="number">
+                <input type="hidden" name="successURL" value="https://your-site.com/tariff">
+                <button type="submit">Pay</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
